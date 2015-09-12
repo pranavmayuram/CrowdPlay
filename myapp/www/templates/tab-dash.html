@@ -1,0 +1,22 @@
+<ion-view view-title="Dashboard" ng-controller="DashCtrl">
+  <ion-content class="padding">
+  <label class="item item-input">
+    <i class="icon ion-search placeholder-icon"></i>
+    <input type="search" placeholder="Search" ng-model="searchText" ng-change="searchSongs(searchText)">
+  </label>
+  <!--<div class="list">
+    <div ng-repeat="song in songs" class="item" >
+      <img ng-src="song.artwork_url" width="20"/>  {{song.title}}
+    </div>
+  </div>-->
+  <div class="list">
+    <div ng-repeat="song in songs">
+      <div class="item item-thumbnail-left" ng-click="addSong(song.uri)">
+        <img ng-src="{{song.artwork_url}}">
+        <!--<div ng-if="!song.artwork_url"><img src="http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png" width="100px"></div>-->
+        <h2>{{song.title}}</h2>
+        <p>{{song.genre}}</p>
+      </div>
+    </div>
+  </div>
+</ion-view>
