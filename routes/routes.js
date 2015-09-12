@@ -1,7 +1,8 @@
 var uuid        = require("uuid");
 var async       = require("async");
 
-var bucket      = require("../app").CrowdPlay;
+var bucket      = require("../app").bucket;
+var couchbase   = require('couchbase');
 var N1qlQuery   = require('couchbase').N1qlQuery;
 
 var appRouter = function(app) {
@@ -31,31 +32,34 @@ var appRouter = function(app) {
     });
 
     app.post("/api/addSong", function(req, res) {
+        console.log(req.body);
         var songObj = {
             playlistChannel: req.body.playlistChannel,
             songID: req.body.songID,
-            artist: req.body.artist,
             genre: req.body.genre,
             image: req.body.image,
             songName: req.body.songName,
             type: "song",
             nowPlaying: false,
             voteCount: 1,
-            songTime: req.body.songTime
-        }
-        var insertSong = N1qlQuery.fromString("INSERT INTO `CrowdPlay` (KEY, VALUE) VALUES ("+songObj.songID+", "+songObj+")");
-        bucket.query(insertSong, function(error, result) {
+            songLength: req.body.songLength,
+            songTime: 0
+        };
+        //var insertSong = N1qlQuery.fromString("UPSERT INTO `CrowdPlay` (KEY, VALUE) VALUES (\""+songObj.songID+"_"+songObj.playlistChannel+"\", "+JSON.stringify(songObj)+")");
+        var insertSong = N1qlQuery.fromString("SELECT * FROM `CrowdPlay`");
+        console.log(insertSong);
+        bucket.query(insertSong, function (error, result) {
             if (error) {
                 console.log(error);
-                res.send('song did not insert, goofed');
-                return;
+                return res.status(400).send(error);
             }
             console.log(result);
+            res.send('song inserted :)');
         });
     });
 
     app.get("/api/getAllSongs", function(req, res) {
-        var getSongs = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"song\" AND playlistChannel = $1");
+        var getSongs = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"song\" AND playlistChannel = $1 ORDER BY voteCount DESC, songName");
         bucket.query(getSongs, [req.query.playlistChannel], function(error, result) {
             if (error) {
                 console.log(error);
@@ -79,6 +83,10 @@ var appRouter = function(app) {
                 return;
             }
             console.log(result);
+            if (result.length > 0) {
+                res.send({'channelExists': 'This channel already exists, you can join it, or pick a different ID.'});
+                return;
+            }
             var channelObj = {
                 playlistChannel: req.body.playlistChannel,
                 numJoins: 1,
@@ -92,7 +100,7 @@ var appRouter = function(app) {
                     return;
                 }
                 console.log(result);
-                res.send('CHANNEL CREATED :)');
+                res.send({'playlistChannel': channelObj.playlistChannel});
             });
         });
     });

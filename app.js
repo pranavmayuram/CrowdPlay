@@ -7,7 +7,9 @@ var morgan          = require('morgan');
 var fs              = require('fs');
 var http            = require('http');
 var config          = require('./config.json');
+var cors = require('cors')
 
+app.use(cors());
 // use commands
 app.use(bodyParser.urlencoded({extended:true, limit: '4mb'}));
 app.use(bodyParser.json({limit: '4mb'}));
@@ -19,7 +21,7 @@ app.use(express.static(__dirname + '/node_modules'));
 
 // create cluster and create buckets using config file
 var cluster = new couchbase.Cluster(config.couchbase.server);
-module.exports.CrowdPlay = cluster.openBucket(config.couchbase.CrowdPlay);
+module.exports.bucket = cluster.openBucket(config.couchbase.CrowdPlay);
 
 // include API endpoints
 var routes = require("./routes/routes.js")(app);

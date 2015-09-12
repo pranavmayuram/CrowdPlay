@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('DashCtrl', function($scope) {
+.controller('DashCtrl', function ($scope, $http, $window, $ionicPopup) {
 	
     $scope.searchSongs = function(someString) {
 		SC.initialize({
@@ -11,9 +11,47 @@ angular.module('starter.controllers', [])
           $scope.songs = tracks;
         });
 	};
+
+    $scope.addSong = function(someObject) {
+        /*var songObj = {
+            playlistChannel: req.body.playlistChannel,
+            songID: req.body.songID,
+            artist: req.body.artist,
+            genre: req.body.genre,
+            image: req.body.image,
+            songName: req.body.songName,
+            type: "song",
+            nowPlaying: false,
+            voteCount: 1,
+            songLength: req.body.songLength,
+            songTime: req.body.songTime
+        }*/
+        var uploadObj = {
+        	playlistChannel: window.localStorage['playlistChannel'],
+        	songID: someObject.id,
+        	genre: someObject.genre,
+        	image: someObject.artwork_url,
+        	songName: someObject.title,
+        	songLength: someObject.duration
+        };
+        $http({method: "POST", url: "http://localhost:3000/api/addSong", data: uploadObj})
+        	.success(function(result) {
+        		console.log(result);
+			    var alertPopup = $ionicPopup.alert({
+			      title: 'Song successfully posted!',
+			      template: 'Your song has successfully been posted, get your friends to vote for it to hear it sooner!'
+			    });
+			    alertPopup.then(function(result) {
+			      console.log('Thank you for not eating my delicious ice cream cone');
+			    });
+        	})
+        	.error(function(result) {
+        		console.log(result);
+        	});
+    };
 })
 
-.controller('ChatsCtrl', function($scope, Chats) {
+.controller('ChatsCtrl', function ($scope, Chats) {
 	// With the new view caching in Ionic, Controllers are only called
 	// when they are recreated or on app start, instead of every page change.
 	// To listen for when this page is active (for example, to refresh data),
