@@ -1,0 +1,24 @@
+{
+  "name": "CrowdPlay",
+  "version": "0.0.1",
+  "description": "Crowd sourced playlist",
+  "main": "app.js",
+  "author": "Pranav Mayuram",
+  "dependencies": {
+    "async": "~1.4.0",
+    "body-parser": "~1.5.2",
+    "couchbase": "^2.0.9",
+    "express": "~4.7.2",
+    "gulp": "~3.9.0",
+    "http": "0.0.0",
+    "https": "^1.0.0",
+    "moment": "^2.10.6",
+    "morgan": "~1.2.2",
+    "multer": "~0.1.8",
+    "node-forge": "^0.6.30",
+    "nodemailer": "^1.4.0",
+    "nodemailer-sendgrid-transport": "^0.2.0",
+    "nodemon": "^1.4.0",
+    "uuid": "^2.0.1"
+  }
+}
