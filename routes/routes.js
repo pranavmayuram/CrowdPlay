@@ -1,7 +1,7 @@
 var uuid        = require("uuid");
 var async       = require("async");
 
-var bucket = require("../app").CrowdPlay;
+var bucket      = require("../app").CrowdPlay;
 var N1qlQuery   = require('couchbase').N1qlQuery;
 
 var appRouter = function(app) {
@@ -82,9 +82,9 @@ var appRouter = function(app) {
             var channelObj = {
                 playlistChannel: req.body.playlistChannel,
                 numJoins: 1,
-                type="channel"
+                type:"channel"
             }
-            var insertChannel = N1qlQuery.fromString("INSERT INTO `CrowdPlay` (KEY, VALUE) VALUES ("+channelObj.playlistChannel+"_channel, "+channelObj")");
+            var insertChannel = N1qlQuery.fromString("INSERT INTO `CrowdPlay` (KEY, VALUE) VALUES ("+channelObj.playlistChannel+"_channel, "+channelObj+")");
             bucket.query(insertChannel, function(err, result) {
                 if (err) {
                     console.log(err);
@@ -119,5 +119,7 @@ var appRouter = function(app) {
             });
         });
     });
+
+};
 
 module.exports = appRouter;
