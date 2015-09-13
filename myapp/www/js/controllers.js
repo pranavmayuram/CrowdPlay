@@ -12,6 +12,17 @@ angular.module('starter.controllers', [])
         });
 	};
 
+    $scope.getAllSongs = function() {
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs"})
+            .success(function(result) {
+                console.log(result);
+            })
+            .error(function(result) {
+                console.log('ERROR: ');
+                console.log(error);
+            });
+    };
+
     $scope.addSong = function(someObject) {
         /*var songObj = {
             playlistChannel: req.body.playlistChannel,
@@ -51,7 +62,7 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('ChatsCtrl', function ($scope, Chats) {
+.controller('ChatsCtrl', function ($scope, Chats, $http, $window) {
 	// With the new view caching in Ionic, Controllers are only called
 	// when they are recreated or on app start, instead of every page change.
 	// To listen for when this page is active (for example, to refresh data),
@@ -60,10 +71,47 @@ angular.module('starter.controllers', [])
 	//$scope.$on('$ionicView.enter', function(e) {
 	//});
 
+    $scope.getAllSongs = function() {
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs"})
+            .success(function(result) {
+                console.log(result);
+                var tempArray = [];
+                for (i=0; i<result.length; i++) {
+                    tempArray.push(result[i].CrowdPlay);
+                }
+                $scope.songs = tempArray;
+
+            })
+            .error(function(result) {
+                console.log('ERROR: ');
+                console.log(error);
+            });
+    };
+
 	$scope.chats = Chats.all();
 	$scope.remove = function(chat) {
 		Chats.remove(chat);
 	};
+
+    $scope.upvote = function(someID) {
+        $http({method: "POST", url: "http://localhost:3000/api/upvote", data: {'songID': someID}})
+            .success(function(result) {
+                console.log(result);
+            })
+            .error(function(result) {
+                console.log(result);
+            });
+    };
+
+    $scope.downvote = function(someID) {
+        $http({method: "POST", url: "http://localhost:3000/api/downvote", data: {'songID': someID}})
+            .success(function(result) {
+                console.log(result);
+            })
+            .error(function(result) {
+                console.log(result);
+            });
+    };
 })
 
 .controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {

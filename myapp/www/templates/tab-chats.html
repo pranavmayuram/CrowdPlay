@@ -1,16 +1,33 @@
-<ion-view view-title="Chats">
+<ion-view view-title="Chats" ng-init="getAllSongs()">
   <ion-content>
-    <ion-list>
-      <ion-item class="item-remove-animate item-avatar item-icon-right" ng-repeat="chat in chats" type="item-text-wrap" href="#/tab/chats/{{chat.id}}">
-        <img ng-src="{{chat.face}}">
-        <h2>{{chat.name}}</h2>
-        <p>{{chat.lastText}}</p>
-        <i class="icon ion-chevron-right icon-accessory"></i>
-
-        <ion-option-button class="button-assertive" ng-click="remove(chat)">
-          Delete
-        </ion-option-button>
-      </ion-item>
-    </ion-list>
+    <!--<div class="tabs" style="top:0px;">
+      <a class="tab-item">
+        Home
+      </a>
+      <a class="tab-item">
+        Favorites
+      </a>
+      <a class="tab-item">
+        Settings
+      </a>
+    </div>-->
+  <div ng-repeat="song in songs">
+    <div class="list card">
+      <div class="item item-avatar">
+        <img ng-src="{{song.image}}">
+        <h2>{{song.songName}}</h2>
+        <p>{{song.genre}}</p>
+        <p><strong>{{song.voteCount}} vote<span ng-if="song.voteCount !== 1">s</span></strong></p>
+      </div>
+      <div class="item tabs tabs-secondary tabs-icon-left">
+        <a class="tab-item" ng-click="upvote(song.songID)">
+          <i class="icon ion-ios-arrow-up"></i> Upvote
+        </a>
+        <a class="tab-item" ng-click="downvote(song.songID)">
+          <i class="icon ion-ios-arrow-down"></i> Downvote
+        </a>
+      </div>
+    </div>
+  </div>
   </ion-content>
 </ion-view>

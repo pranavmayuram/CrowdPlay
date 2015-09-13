@@ -1,7 +1,7 @@
 var uuid        = require("uuid");
 var async       = require("async");
 
-var bucket      = require("../app").bucket;
+var bucket      = require("../app.js").bucket;
 var couchbase   = require('couchbase');
 var N1qlQuery   = require('couchbase').N1qlQuery;
 
@@ -9,6 +9,7 @@ var appRouter = function(app) {
 
     app.post("/api/upvote", function(req, res) {
         var changeVote = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS ($1) SET voteCount = voteCount + 1");
+        console.log(changeVote);
         bucket.query(changeVote, [req.body.songID], function(error, result) {
             if (error) {
                 console.log(error);
@@ -16,18 +17,22 @@ var appRouter = function(app) {
                 return;
             }
             console.log(result);
+            res.send(result);
         });
     });
 
     app.post("/api/downvote", function(req, res) {
+        var updatedID = req.body.songID + "_" + req.body.playlistChannel;
         var changeVote = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS ($1) SET voteCount = voteCount - 1");
-        bucket.query(changeVote, [req.body.songID], function(error, result) {
+        console.log(changeVote);
+        bucket.query(changeVote, [updatedID], function(error, result) {
             if (error) {
                 console.log(error);
                 res.send('we dun goofed the downvote');
                 return;
             }
             console.log(result);
+            res.send(result);
         });
     });
 
@@ -45,8 +50,8 @@ var appRouter = function(app) {
             songLength: req.body.songLength,
             songTime: 0
         };
-        //var insertSong = N1qlQuery.fromString("UPSERT INTO `CrowdPlay` (KEY, VALUE) VALUES (\""+songObj.songID+"_"+songObj.playlistChannel+"\", "+JSON.stringify(songObj)+")");
-        var insertSong = N1qlQuery.fromString("SELECT * FROM `CrowdPlay`");
+        var insertSong = N1qlQuery.fromString("UPSERT INTO `CrowdPlay` (KEY, VALUE) VALUES (\""+songObj.songID+"_"+songObj.playlistChannel+"\", "+JSON.stringify(songObj)+")");
+        //var insertSong = N1qlQuery.fromString("SELECT * FROM `CrowdPlay`");
         console.log(insertSong);
         bucket.query(insertSong, function (error, result) {
             if (error) {
@@ -54,13 +59,15 @@ var appRouter = function(app) {
                 return res.status(400).send(error);
             }
             console.log(result);
-            res.send('song inserted :)');
+            res.send('song inserted');
         });
     });
 
     app.get("/api/getAllSongs", function(req, res) {
-        var getSongs = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"song\" AND playlistChannel = $1 ORDER BY voteCount DESC, songName");
-        bucket.query(getSongs, [req.query.playlistChannel], function(error, result) {
+        var getSongs = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"song\" ORDER BY voteCount DESC, songName");
+        //AND playlistChannel = $1
+        console.log(getSongs);
+        bucket.query(getSongs, /*[req.query.playlistChannel],*/ function(error, result) {
             if (error) {
                 console.log(error);
                 res.send('getting songs dun goofed');
@@ -71,6 +78,7 @@ var appRouter = function(app) {
                 res.send({'noContent': 'There are currently no songs in this playlist. Go ahead and add some!'});
                 return;
             }
+            res.json(result);
         });
     });
 

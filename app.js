@@ -21,7 +21,7 @@ app.use(express.static(__dirname + '/node_modules'));
 
 // create cluster and create buckets using config file
 var cluster = new couchbase.Cluster(config.couchbase.server);
-module.exports.bucket = cluster.openBucket(config.couchbase.CrowdPlay);
+module.exports.bucket = cluster.openBucket('CrowdPlay');
 
 // include API endpoints
 var routes = require("./routes/routes.js")(app);
