@@ -9,16 +9,28 @@ var appRouter = function(app) {
 
     app.post("/api/upvote", function(req, res) {
         var updatedID = req.body.songID + "_" + req.body.playlistChannel;
-        var changeVote = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS ($1) SET voteCount = voteCount + 1");
-        console.log(changeVote);
-        bucket.query(changeVote, [updatedID], function(error, result) {
+        console.log(updatedID);
+        var getSong = N1qlQuery.fromString("SELECT voteCount FROM `CrowdPlay` USE KEYS ($1)");
+        bucket.query(getSong, [updatedID], function(error, result) {
             if (error) {
                 console.log(error);
-                res.send('we dun goofed the upvote');
+                res.send('we dun goofed the userGet');
                 return;
             }
             console.log(result);
-            res.send(result);
+            var newVC = result[0].voteCount + 1;
+            console.log('newVC: '+newVC);
+            var changeVote = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS ($1) SET voteCount = $2");
+            console.log(changeVote);
+            bucket.query(changeVote, [updatedID, newVC], function(err, resu) {
+                if (error) {
+                    console.log(err);
+                    res.send('we dun goofed the userGet');
+                    return;
+                }
+                console.log(resu);
+                res.send(resu);
+            });
         });
     });
 

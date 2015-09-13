@@ -108,7 +108,7 @@ angular.module('starter.controllers', [])
 	};
 
     $scope.upvote = function(someID) {
-        $http({method: "POST", url: "http://localhost:3000/api/upvote", data: {'songID': someID}})
+        $http({method: "POST", url: "http://localhost:3000/api/upvote", data: {'songID': someID, 'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
                 console.log(result);
                 var searchID = $scope.songs;
@@ -129,7 +129,7 @@ angular.module('starter.controllers', [])
     };
 
     $scope.downvote = function(someID) {
-        $http({method: "POST", url: "http://localhost:3000/api/downvote", data: {'songID': someID}})
+        $http({method: "POST", url: "http://localhost:3000/api/downvote", data: {'songID': someID, 'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
                 console.log(result);
                 //$window.location.reload(true);
