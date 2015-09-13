@@ -77,7 +77,7 @@ var appRouter = function(app) {
     });
 
     app.get("/api/getAllSongs", function(req, res) {
-        var getSongs = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"song\" AND playlistChannel = $1 ORDER BY voteCount DESC, songName");
+        var getSongs = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"song\" AND playlistChannel = $1 AND nowPlaying = false ORDER BY voteCount DESC, songName");
         //AND playlistChannel = $1
         console.log(getSongs);
         bucket.query(getSongs, [req.query.playlistChannel],/*[req.query.playlistChannel],*/ function(error, result) {
@@ -92,6 +92,18 @@ var appRouter = function(app) {
                 return;
             }
             res.json(result);
+        });
+    });
+
+    app.post("/api/nowPlayingChange", function(req, res) {
+        var nowChange = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS(\""+req.body.songID+"_"+req.body.playlistChannel+"\") SET nowPlaying = true");
+         bucket.query(nowChange, function(error, result) {
+            if (error) {
+                console.log(result);
+                res.send('shit, nowChange dun goofed');
+                return;
+            }
+            res.json(result);   
         });
     });
 
@@ -156,6 +168,26 @@ var appRouter = function(app) {
                 }
                 console.log(result);
                 res.send({'playlistChannel': req.body.playlistChannel});
+            });
+        });
+    });
+
+    app.get("/api/statistics", function(req, res) {
+        var bigQuery = N1qlQuery.fromString("SELECT numJoins FROM `CrowdPlay` WHERE type=\"channel\" AND playlistChannel = $1");
+        console.log(bigQuery);
+        bucket.query(bigQuery, [req.query.playlistChannel], function(error, result) {
+            if (error) {
+                console.log(result);
+                res.send('shit, stats dun goofed');
+                return;
+            }
+            var songCount = N1qlQuery.fromString("SELECT COUNT(*) AS songCount FEOM `CrowdPlay` WHERE playlistChannel = $1");
+            bucket.query(songCount, function(err, resu) {
+                if (err) {
+                    console.log(err);
+                    res.send('balls, songcount');
+                    return
+                }
             });
         });
     });

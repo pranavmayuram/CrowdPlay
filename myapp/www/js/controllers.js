@@ -226,12 +226,49 @@ angular.module('starter.controllers', [])
         });
     };
 
-    $scope.refreshPlaylist = function() {
-        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs"})
+    /*$scope.refreshPlaylist = function() {
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs",  params: {'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
-
+                var tempArray = [];
+                for (i=0; i<result.length; i++) {
+                    if (!result[i].CrowdPlay.image) {
+                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+                    }
+                    tempArray.push(result[i].CrowdPlay);
+                }
             })
-    }
+    }*/
+
+    $scope.nowPlayingChange = function(songID) {
+        $http({method: "POST", url: "http://localhost:3000/api/nowPlayingChange", data: {'playlistChannel': $window.localStorage.playlistChannel, 'songID': songID}})
+            .success(function(result) {
+                console.log(result);
+            })
+            .error(function(result) {
+                console.log(result)
+            });
+    };
+
+    $scope.initialPull = function() {
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+            .success(function(result) {
+                console.log(result);
+                for (i=0; i<result.length; i++) {
+                    if (!result[i].CrowdPlay.image) {
+                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+                    }
+                    tempArray.push(result[i].CrowdPlay);
+                }
+                $scope.nowPlaying = tempArray[0];
+                var endLength = tempArray.length + 1;
+                $scope.queue = tempArray.slice(1, endLength);
+                $scope.play($scope.nowPlaying.songID);
+                $scope.nowPlayingChange($scope.nowPlaying.songID);
+            })
+            .error(function(result) {
+                console.log(error);
+            });
+    };
 
     $scope.getAllSongsManip = function() {
         $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
@@ -248,19 +285,34 @@ angular.module('starter.controllers', [])
                 var endLength = tempArray.length + 1;
                 $scope.queue = tempArray.slice(1, endLength);
                 $scope.play($scope.nowPlaying.songID);
-                $http({method: "POST", url: "http://localhost:3000/api/nowPlayingChange"})
-                    .success(function(result) {
-                        console.log(result);
-                    })
-                    .error(function(result) {
-                        console.log()
-                    })
+                $scope.nowPlayingChange($scope.nowPlaying.songID);
             })
             .error(function(result) {
                 console.log('ERROR: ');
                 console.log(error);
             });
     };
+
+    $scope.initializeQueue = function() {
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+            .success(function(result) {
+                console.log(result);
+            })
+            .error(function(result) {
+                console.log('ERROR: ');
+                console.log(error);
+            });
+    }
+
+    /*$scope.nowPlayingChange = function(songID) {
+        $http({method: "POST", url: "http://localhost:3000/api/nowPlayingChange", params: {'playlistChannel': $window.localStorage.playlistChannel, 'songID': songID}})
+            .success(function(result) {
+                console.log(result);
+            })
+            .error(function(result) {
+                console.log(result);
+            });
+    }*/
 
 
     $scope.pause = function(){
