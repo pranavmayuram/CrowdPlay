@@ -18,8 +18,9 @@ angular.module('starter.controllers', [])
 	};
 
     $scope.getAllSongs = function() {
-        console.log('localStorage: ' + $window.localStorage.playlistInfo.playlistChannel);
-        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistInfo.playlistChannel}})
+        console.log('localStorage: '); 
+        console.log($window.localStorage);
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
                 console.log(result);
                 for (i=0; i <result.length; i++) {
@@ -49,7 +50,7 @@ angular.module('starter.controllers', [])
             songTime: req.body.songTime
         }*/
         var uploadObj = {
-        	playlistChannel: window.localStorage['playlistChannel'],
+        	playlistChannel: $window.localStorage.playlistChannel,
         	songID: someObject.id,
         	genre: someObject.genre,
         	image: someObject.artwork_url,
@@ -83,7 +84,7 @@ angular.module('starter.controllers', [])
 	//});
 
     $scope.getAllSongs = function() {
-        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs"})
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
                 console.log(result);
                 var tempArray = [];
@@ -159,6 +160,7 @@ angular.module('starter.controllers', [])
     $scope.joinChannel = function(someString) {
         $http({method: "POST", url: "http://localhost:3000/api/joinChannel", data: {'playlistChannel': someString}})
             .success(function(result) {
+                console.log(result);
                 if (result.channelDNE) {
                     var alertPopup = $ionicPopup.alert({
                     title: 'Channel Does Not Exist',
@@ -166,8 +168,9 @@ angular.module('starter.controllers', [])
                   });
                 }
                 else {
-                    localStorage.playlistInfo = {'playlistChannel': result.playlistChannel, 'admin': false};
-                    console.log(localStorage.playlistInfo);
+                    $window.localStorage.playlistChannel = result.playlistChannel;
+                    $window.localStorage.admin = false;
+                    console.log($window.localStorage);
                     $state.go('tab.dash');
                 }
             })
@@ -179,6 +182,7 @@ angular.module('starter.controllers', [])
     $scope.createChannel = function(someString) {
         $http({method: "POST", url: "http://localhost:3000/api/createChannel", data: {'playlistChannel': someString}})
             .success(function(result) {
+                console.log(result);
                 if (result.channelExists) {
                     var alertPopup = $ionicPopup.alert({
                     title: 'Channel Already Exists',
@@ -186,8 +190,9 @@ angular.module('starter.controllers', [])
                   });
                 }
                 else {
-                    localStorage.playlistInfo = {'playlistChannel': result.playlistChannel, 'admin': true};
-                    console.log(localStorage.playlistInfo);
+                    $window.localStorage.playlistChannel = result.playlistChannel;
+                    $window.localStorage.admin = true;
+                    console.log($window.localStorage);
                     $state.go('tab.dash');
                 }
             })
@@ -229,7 +234,7 @@ angular.module('starter.controllers', [])
     }
 
     $scope.getAllSongsManip = function() {
-        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs"})
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
                 console.log(result);
                 var tempArray = [];

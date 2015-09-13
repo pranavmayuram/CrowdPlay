@@ -133,10 +133,12 @@ var appRouter = function(app) {
             }
             console.log(result);
             console.log('channel joined!')
+            var channelID = req.body.playlistChannel + "_channel";
             var updateChannelCount = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS($1) SET numJoins = numJoins + 1");
-            bucket.query(updateChannelCount, [req.body.playlistChannel], function(err, result) {
+            console.log(updateChannelCount);
+            bucket.query(updateChannelCount, [channelID], function(err, result) {
                 if (err) {
-                    console.log(result);
+                    console.log(err);
                     res.send('updateChannelCount dun goofed');
                     return;
                 }
