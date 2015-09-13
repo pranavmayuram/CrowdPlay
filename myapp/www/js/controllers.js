@@ -74,7 +74,7 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('ChatsCtrl', function ($scope, Chats, $http, $state, $window) {
+.controller('ChatsCtrl', function ($scope, Chats, $http, $state, $window, $interval, $timeout) {
 	// With the new view caching in Ionic, Controllers are only called
 	// when they are recreated or on app start, instead of every page change.
 	// To listen for when this page is active (for example, to refresh data),
@@ -83,14 +83,35 @@ angular.module('starter.controllers', [])
 	//$scope.$on('$ionicView.enter', function(e) {
 	//});
 
+    // $scope.getAllSongs = function() {
+    //     $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+    //         .success(function(result) {
+    //             console.log(result);
+    //             var tempArray = [];
+    //             for (i=0; i<result.length; i++) {
+    //                 if (!result[i].CrowdPlay.image) {
+    //                     result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+    //                 }
+    //                 tempArray.push(result[i].CrowdPlay);
+    //             }
+    //             $scope.songs = tempArray;
+    //         })
+    //         .error(function(result) {
+    //             console.log('ERROR: ');
+    //             console.log(error);
+    //         });
+    // };
+
     $scope.getAllSongs = function() {
+        console.log('localStorage: '); 
+        console.log($window.localStorage);
         $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
                 console.log(result);
                 var tempArray = [];
-                for (i=0; i<result.length; i++) {
-                    if (!result[i].CrowdPlay.image) {
-                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+                for (i=0; i <result.length; i++) {
+                    if (!result[i].artwork_url) {
+                        result[i].artwork_url="http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
                     }
                     tempArray.push(result[i].CrowdPlay);
                 }
@@ -100,6 +121,25 @@ angular.module('starter.controllers', [])
                 console.log('ERROR: ');
                 console.log(error);
             });
+        $interval(function() {
+            $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+            .success(function(result) {
+                console.log(result);
+                var tempArray = [];
+                for (i=0; i <result.length; i++) {
+                    if (!result[i].artwork_url) {
+                        result[i].artwork_url="http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+                    }
+                    tempArray.push(result[i].CrowdPlay);
+                }
+                $scope.songs = tempArray;
+            })
+            .error(function(result) {
+                console.log('ERROR: ');
+                console.log(error);
+            });}
+            , 5000);
+        
     };
 
 	$scope.chats = Chats.all();
@@ -211,18 +251,11 @@ angular.module('starter.controllers', [])
         SC.initialize({
           client_id: 'f3b6636c2e427ba511f65603ba7448b7'
         });
+        
         SC.stream("https://api.soundcloud.com/tracks/" + id, function (sound) {
             // Save sound, it holds all the data needed to stop, resume, etc.
             $scope.soundObj = sound;
-            sound.play({
-                onfinish: function() {              
-                //Start a new song or something.
-                    $scope.nowPlaying = $scope.queue[0];
-                    var endLength = tempArray.length + 1;
-                    $scope.queue = tempArray.slice(1, endLength);
-                    $scope.play($scope.nowPlaying.songID);
-                }
-            });
+            sound.play();
         });
     };
 
@@ -284,8 +317,8 @@ angular.module('starter.controllers', [])
                 $scope.nowPlaying = tempArray[0];
                 var endLength = tempArray.length + 1;
                 $scope.queue = tempArray.slice(1, endLength);
-                $scope.play($scope.nowPlaying.songID);
                 $scope.nowPlayingChange($scope.nowPlaying.songID);
+                $scope.play($scope.nowPlaying.songID);
             })
             .error(function(result) {
                 console.log('ERROR: ');

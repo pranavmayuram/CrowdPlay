@@ -12,9 +12,11 @@ navigation history that also transitions its views in and out.
   </ion-tab>
 
   <!-- Chats Tab -->
+  <div ng-controller="ChatsCtrl" ng-click="getAllSongs()">
   <ion-tab title="Voting" icon-off="ion-android-done-all" icon-on="ion-android-done-all" href="#/tab/chats">
     <ion-nav-view name="tab-chats"></ion-nav-view>
   </ion-tab>
+  </div>
 
   <!-- Dashboard Tab -->
   <ion-tab title="Search" icon-off="ion-ios-search" icon-on="ion-ios-search-strong" href="#/tab/dash">
