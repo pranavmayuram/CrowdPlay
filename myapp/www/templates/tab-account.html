@@ -1,15 +1,25 @@
-<ion-view view-title="Account">
+<ion-view view-title="Account" ng-init="getAllSongsManip()">
   <ion-content>
 
     <ion-list>
-    <div ng-repeat="nowPlaying in playing">
     <div class="list card">
       <div class="item item-avatar">
-        <img ng-src="{{song.image}}">
-        <h2>{{song.songName}}</h2>
-        <p>{{song.genre}}</p>
-        <p><strong>{{song.voteCount}} vote<span ng-if="song.voteCount !== 1">s</span></strong></p>
+        <img ng-src="{{nowPlaying.image}}">
+        <h5><i class="ion-ios-play"></i> <strong>Now Playing: </strong></h5>
+        <h4>{{nowPlaying.songName}}</h4>
+        <p>{{nowPlaying.genre}}</p>
       </div>
+    </div>
+    </ion-list>
+
+    <ion-list>
+    <div ng-repeat="song in queue">
+    	<div class="item item-thumbnail-left">
+	       <img ng-src="{{song.image}}">
+	       <!--<div ng-if="!song.artwork_url"><img src="http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png" width="100px"></div>-->
+	       <h4>{{song.songName}}</h4>
+	       <p>{{song.genre}}</p>
+	    </div>
     </div>
     </ion-list>
   </ion-content>

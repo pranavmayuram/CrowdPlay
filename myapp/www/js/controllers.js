@@ -164,8 +164,46 @@ angular.module('starter.controllers', [])
     }
 })
 
-.controller('AccountCtrl', function($scope) {
+.controller('AccountCtrl', function($scope, $http, $state, $window, $stateParams) {
 	$scope.settings = {
 		enableFriends: true
 	};
+
+    $scope.play = function(id){
+        SC.stream("https://api.soundcloud.com/track/" + id, function (sound) {
+            // Save sound, it holds all the data needed to stop, resume, etc.
+            $scope.soundObj = sound;
+            sound.play({
+                onfinish: function() {              
+                //Start a new song or something.
+                }
+            });
+        });
+    };
+
+    $scope.getAllSongsManip = function() {
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs"})
+            .success(function(result) {
+                console.log(result);
+                var tempArray = [];
+                for (i=0; i<result.length; i++) {
+                    if (!result[i].CrowdPlay.image) {
+                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+                    }
+                    tempArray.push(result[i].CrowdPlay);
+                }
+                $scope.nowPlaying = tempArray[0];
+                var endLength = tempArray.length + 1;
+                $scope.queue = tempArray.slice(1, endLength);
+            })
+            .error(function(result) {
+                console.log('ERROR: ');
+                console.log(error);
+            });
+    };
+
+
+    $scope.pause = function(){
+      $scope.soundObj.pause();
+    }
 });
