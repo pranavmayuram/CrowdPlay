@@ -1,0 +1,39 @@
+<ion-view title="CrowdPlay">
+  <ion-content>
+  <div class="row row-center">
+  <div class="col" style="text-align:center">
+    <img src="./img/CloudPlay.png" width="80"/>
+  </div>
+  </div>
+  <br/>
+    <h4 style="text-align:center">Join a Channel</h4>
+    <div class="list list-inset">
+      <label class="item item-input">
+        <span class="input-label">Channel:</span>
+        <input type="text" ng-model="joinChannelVar">
+      </label>
+    </div>
+    <div class="padding">
+      <button nav-clear class="button button-block button-positive" ng-click="joinChannel(joinChannelVar)">
+        Join
+      </button>
+    </div>
+
+    <br/>
+    <br/>
+
+    <h4 style="text-align:center">Create a Channel</h4>
+      <div class="list list-inset">
+      <label class="item item-input">
+        <span class="input-label">Channel:</span>
+        <input type="text" ng-model="createChannelVar">
+      </label>
+    </div>
+    <div class="padding">
+      <button nav-clear class="button button-block button-balanced" style="text-align:center" ng-click="createChannel(createChannelVar)">
+        Create
+      </button>
+   
+    </div>
+  </ion-content>
+</ion-view>

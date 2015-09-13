@@ -8,9 +8,10 @@ var N1qlQuery   = require('couchbase').N1qlQuery;
 var appRouter = function(app) {
 
     app.post("/api/upvote", function(req, res) {
+        var updatedID = req.body.songID + "_" + req.body.playlistChannel;
         var changeVote = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS ($1) SET voteCount = voteCount + 1");
         console.log(changeVote);
-        bucket.query(changeVote, [req.body.songID], function(error, result) {
+        bucket.query(changeVote, [updatedID], function(error, result) {
             if (error) {
                 console.log(error);
                 res.send('we dun goofed the upvote');

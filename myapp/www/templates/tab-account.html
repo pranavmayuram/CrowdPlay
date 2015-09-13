@@ -1,9 +1,16 @@
 <ion-view view-title="Account">
   <ion-content>
+
     <ion-list>
-    <ion-toggle  ng-model="settings.enableFriends">
-        Enable Friends
-    </ion-toggle>
+    <div ng-repeat="nowPlaying in playing">
+    <div class="list card">
+      <div class="item item-avatar">
+        <img ng-src="{{song.image}}">
+        <h2>{{song.songName}}</h2>
+        <p>{{song.genre}}</p>
+        <p><strong>{{song.voteCount}} vote<span ng-if="song.voteCount !== 1">s</span></strong></p>
+      </div>
+    </div>
     </ion-list>
   </ion-content>
 </ion-view>

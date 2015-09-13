@@ -8,6 +8,11 @@ angular.module('starter.controllers', [])
 		});
         SC.get('/tracks', {q: someString}, function(tracks) {
           console.log(tracks);
+          for (i=0; i <tracks.length; i++) {
+                if (!tracks[i].artwork_url) {
+                    tracks[i].artwork_url="http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+                }
+            }
           $scope.songs = tracks;
         });
 	};
@@ -16,6 +21,11 @@ angular.module('starter.controllers', [])
         $http({method: "GET", url: "http://localhost:3000/api/getAllSongs"})
             .success(function(result) {
                 console.log(result);
+                for (i=0; i <result.length; i++) {
+                    if (!result[i].artwork_url) {
+                        result[i].artwork_url="http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+                    }
+                }
             })
             .error(function(result) {
                 console.log('ERROR: ');
@@ -62,7 +72,7 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('ChatsCtrl', function ($scope, Chats, $http, $window) {
+.controller('ChatsCtrl', function ($scope, Chats, $http, $state, $window) {
 	// With the new view caching in Ionic, Controllers are only called
 	// when they are recreated or on app start, instead of every page change.
 	// To listen for when this page is active (for example, to refresh data),
@@ -77,10 +87,12 @@ angular.module('starter.controllers', [])
                 console.log(result);
                 var tempArray = [];
                 for (i=0; i<result.length; i++) {
+                    if (!result[i].CrowdPlay.image) {
+                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+                    }
                     tempArray.push(result[i].CrowdPlay);
                 }
                 $scope.songs = tempArray;
-
             })
             .error(function(result) {
                 console.log('ERROR: ');
@@ -97,6 +109,17 @@ angular.module('starter.controllers', [])
         $http({method: "POST", url: "http://localhost:3000/api/upvote", data: {'songID': someID}})
             .success(function(result) {
                 console.log(result);
+                var searchID = $scope.songs;
+                for (i=0; i<searchID.length; i++) {
+                    if (searchID[i].songID === someID) {
+                        $scope.songs[i].voteCount += 1;
+                        console.log(searchID[i].songID);
+                        console.log($scope.songs[i].voteCount);
+                    }
+                }
+                //$window.location.reload(true);
+                //$state.go($state.current, {}, {reload: true});
+                //$state.reload();
             })
             .error(function(result) {
                 console.log(result);
@@ -107,6 +130,15 @@ angular.module('starter.controllers', [])
         $http({method: "POST", url: "http://localhost:3000/api/downvote", data: {'songID': someID}})
             .success(function(result) {
                 console.log(result);
+                //$window.location.reload(true);
+                var searchID = $scope.songs;
+                for (i=0; i<searchID.length; i++) {
+                    if (searchID[i].songID === someID) {
+                        $scope.songs[i].voteCount -= 1;
+                        console.log(searchID[i].songID);
+                        console.log($scope.songs[i].voteCount);
+                    }
+                }
             })
             .error(function(result) {
                 console.log(result);
@@ -116,6 +148,20 @@ angular.module('starter.controllers', [])
 
 .controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
 	$scope.chat = Chats.get($stateParams.chatId);
+})
+
+.controller('login', function($scope, $stateParams, $state, $http, $window) {
+    $scope.loginCheck = function(someObject) {
+        $state.go('tab.dash');
+    }
+
+    $scope.joinChannel = function(someString) {
+        $state.go('tab.dash');
+    }
+
+    $scope.createChannel = function(someString) {
+        $state.go('tab.dash');
+    }
 })
 
 .controller('AccountCtrl', function($scope) {

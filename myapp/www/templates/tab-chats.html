@@ -1,5 +1,12 @@
-<ion-view view-title="Chats" ng-init="getAllSongs()">
+<style>
+.card
+{
+     margin-bottom: 5px !important;
+}
+</style>
+<ion-view view-title="Voting" ng-init="getAllSongs()">
   <ion-content>
+  <ion-spinner class="spinner-energized" ng-show="loading"></ion-spinner>
     <!--<div class="tabs" style="top:0px;">
       <a class="tab-item">
         Home
@@ -11,7 +18,7 @@
         Settings
       </a>
     </div>-->
-  <div ng-repeat="song in songs">
+  <div ng-repeat="song in songs | orderBy: '-voteCount'">
     <div class="list card">
       <div class="item item-avatar">
         <img ng-src="{{song.image}}">
