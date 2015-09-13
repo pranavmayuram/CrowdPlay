@@ -65,10 +65,10 @@ var appRouter = function(app) {
     });
 
     app.get("/api/getAllSongs", function(req, res) {
-        var getSongs = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"song\" ORDER BY voteCount DESC, songName");
+        var getSongs = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"song\" AND playlistChannel = $1 ORDER BY voteCount DESC, songName");
         //AND playlistChannel = $1
         console.log(getSongs);
-        bucket.query(getSongs, /*[req.query.playlistChannel],*/ function(error, result) {
+        bucket.query(getSongs, [req.query.playlistChannel],/*[req.query.playlistChannel],*/ function(error, result) {
             if (error) {
                 console.log(error);
                 res.send('getting songs dun goofed');
@@ -84,6 +84,7 @@ var appRouter = function(app) {
     });
 
     app.post("/api/createChannel", function(req, res) {
+        var channelID = req.body.playlistChannel + "_channel";
         var checkChannel = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"channel\" AND playlistChannel = $1");
         bucket.query(checkChannel, [req.body.playlistChannel], function(error, result) {
             if (error) {
@@ -93,16 +94,17 @@ var appRouter = function(app) {
             }
             console.log(result);
             if (result.length > 0) {
-                res.send({'channelExists': 'This channel already exists, you can join it, or pick a different ID.'});
+                res.send({'channelExists': 'This channel already exists. You can join it, or pick a different ID.'});
                 return;
             }
             var channelObj = {
                 playlistChannel: req.body.playlistChannel,
                 numJoins: 1,
                 type:"channel"
-            }
-            var insertChannel = N1qlQuery.fromString("INSERT INTO `CrowdPlay` (KEY, VALUE) VALUES ("+channelObj.playlistChannel+"_channel, "+channelObj+")");
-            bucket.query(insertChannel, function(err, result) {
+            };
+            var insertChannel = N1qlQuery.fromString("UPSERT INTO `CrowdPlay` (KEY, VALUE) VALUES ($1, $2)");
+            console.log(insertChannel);
+            bucket.query(insertChannel, [channelID, channelObj], function(err, result) {
                 if (err) {
                     console.log(err);
                     res.send('insertChannel dun goofed, ballz');
@@ -116,10 +118,17 @@ var appRouter = function(app) {
 
     app.post("/api/joinChannel", function(req, res) {
         var checkChannel = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"channel\" AND playlistChannel = $1");
+        console.log(checkChannel);
+        console.log(req.body);
         bucket.query(checkChannel, [req.body.playlistChannel], function(error, result) {
             if (error) {
                 console.log(result);
                 res.send('shit, checkChannel dun goofed');
+                return;
+            }
+            if (result.length === 0) {
+                console.log('none found');
+                res.send({'channelDNE': 'This channel does not exist. Please create it, or try again.'});
                 return;
             }
             console.log(result);

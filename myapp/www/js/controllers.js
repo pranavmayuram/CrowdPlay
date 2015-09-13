@@ -18,7 +18,8 @@ angular.module('starter.controllers', [])
 	};
 
     $scope.getAllSongs = function() {
-        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs"})
+        console.log('localStorage: ' + $window.localStorage.playlistInfo.playlistChannel);
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistInfo.playlistChannel}})
             .success(function(result) {
                 console.log(result);
                 for (i=0; i <result.length; i++) {
@@ -146,22 +147,54 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
+.controller('ChatDetailCtrl', function($scope, $stateParams, Chats, $ionicPopup) {
 	$scope.chat = Chats.get($stateParams.chatId);
 })
 
-.controller('login', function($scope, $stateParams, $state, $http, $window) {
+.controller('login', function($scope, $stateParams, $state, $http, $window, $ionicPopup) {
     $scope.loginCheck = function(someObject) {
         $state.go('tab.dash');
     }
 
     $scope.joinChannel = function(someString) {
-        $state.go('tab.dash');
-    }
+        $http({method: "POST", url: "http://localhost:3000/api/joinChannel", data: {'playlistChannel': someString}})
+            .success(function(result) {
+                if (result.channelDNE) {
+                    var alertPopup = $ionicPopup.alert({
+                    title: 'Channel Does Not Exist',
+                    template: result.channelDNE
+                  });
+                }
+                else {
+                    localStorage.playlistInfo = {'playlistChannel': result.playlistChannel, 'admin': false};
+                    console.log(localStorage.playlistInfo);
+                    $state.go('tab.dash');
+                }
+            })
+            .error(function(result) {
+                console.log(error);
+            });
+    };
 
     $scope.createChannel = function(someString) {
-        $state.go('tab.dash');
-    }
+        $http({method: "POST", url: "http://localhost:3000/api/createChannel", data: {'playlistChannel': someString}})
+            .success(function(result) {
+                if (result.channelExists) {
+                    var alertPopup = $ionicPopup.alert({
+                    title: 'Channel Already Exists',
+                    template: result.channelExists
+                  });
+                }
+                else {
+                    localStorage.playlistInfo = {'playlistChannel': result.playlistChannel, 'admin': true};
+                    console.log(localStorage.playlistInfo);
+                    $state.go('tab.dash');
+                }
+            })
+            .error(function(result) {
+                console.log(error);
+            });
+    };
 })
 
 .controller('AccountCtrl', function($scope, $http, $state, $window, $stateParams) {
@@ -170,16 +203,30 @@ angular.module('starter.controllers', [])
 	};
 
     $scope.play = function(id){
-        SC.stream("https://api.soundcloud.com/track/" + id, function (sound) {
+        SC.initialize({
+          client_id: 'f3b6636c2e427ba511f65603ba7448b7'
+        });
+        SC.stream("https://api.soundcloud.com/tracks/" + id, function (sound) {
             // Save sound, it holds all the data needed to stop, resume, etc.
             $scope.soundObj = sound;
             sound.play({
                 onfinish: function() {              
                 //Start a new song or something.
+                    $scope.nowPlaying = $scope.queue[0];
+                    var endLength = tempArray.length + 1;
+                    $scope.queue = tempArray.slice(1, endLength);
+                    $scope.play($scope.nowPlaying.songID);
                 }
             });
         });
     };
+
+    $scope.refreshPlaylist = function() {
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs"})
+            .success(function(result) {
+
+            })
+    }
 
     $scope.getAllSongsManip = function() {
         $http({method: "GET", url: "http://localhost:3000/api/getAllSongs"})
@@ -195,6 +242,14 @@ angular.module('starter.controllers', [])
                 $scope.nowPlaying = tempArray[0];
                 var endLength = tempArray.length + 1;
                 $scope.queue = tempArray.slice(1, endLength);
+                $scope.play($scope.nowPlaying.songID);
+                $http({method: "POST", url: "http://localhost:3000/api/nowPlayingChange"})
+                    .success(function(result) {
+                        console.log(result);
+                    })
+                    .error(function(result) {
+                        console.log()
+                    })
             })
             .error(function(result) {
                 console.log('ERROR: ');
