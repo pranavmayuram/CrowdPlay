@@ -194,7 +194,7 @@ angular.module('starter.controllers', [])
 
 .controller('login', function($scope, $stateParams, $state, $http, $window, $ionicPopup) {
     $scope.loginCheck = function(someObject) {
-        $state.go('tab.dash');
+        $state.go('tab.chats');
     }
 
     $scope.joinChannel = function(someString) {
@@ -211,7 +211,7 @@ angular.module('starter.controllers', [])
                     $window.localStorage.playlistChannel = result.playlistChannel;
                     $window.localStorage.admin = false;
                     console.log($window.localStorage);
-                    $state.go('tab.dash');
+                    $state.go('tab.chats');
                 }
             })
             .error(function(result) {
