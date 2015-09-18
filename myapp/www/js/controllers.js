@@ -242,6 +242,22 @@ angular.module('starter.controllers', [])
     };
 })
 
+.controller('chInfoCtrl', function($scope, $http, $state, $window, $stateParams, $interval) {
+
+    $scope.getStats = function() {
+        $http({method: "GET", url: "http://localhost:3000/api/statistics", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+            .success(function(result) {
+                $scope.playlistChannel = $window.localStorage.playlistChannel;
+                $scope.numJoins = result.numJoins;
+                $scope.songCount = result.songCount;
+                console.log(result);
+            })
+            .error(function(result) {
+                console.log(result);
+            });
+    };
+})
+
 .controller('AccountCtrl', function($scope, $http, $state, $window, $stateParams, $interval) {
 	$scope.settings = {
 		enableFriends: true

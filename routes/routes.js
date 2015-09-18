@@ -181,13 +181,16 @@ var appRouter = function(app) {
                 res.send('shit, stats dun goofed');
                 return;
             }
-            var songCount = N1qlQuery.fromString("SELECT COUNT(*) AS songCount FEOM `CrowdPlay` WHERE playlistChannel = $1");
-            bucket.query(songCount, function(err, resu) {
+            var songCount = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"song\" AND playlistChannel = $1");
+            console.log(songCount);
+            bucket.query(songCount, [req.query.playlistChannel], function(err, resu) {
                 if (err) {
                     console.log(err);
                     res.send('balls, songcount');
                     return
                 }
+                console.log(resu);
+                res.send({'songCount':resu.length, 'numJoins':result[0].numJoins});
             });
         });
     });
