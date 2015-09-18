@@ -9,6 +9,21 @@
         <h4>{{nowPlaying.songName}}</h4>
         <p>{{nowPlaying.genre}}</p>
       </div>
+      <div class="item tabs tabs-secondary tabs-icon-left">
+        <span ng-show="!paused">
+        <a class="tab-item" ng-click="pauseOrResume('pause'); changePauseVar(true);">
+          <i class="icon ion-ios-pause"></i> Pause
+        </a>
+        </span>
+        <span ng-show="paused">
+        <a class="tab-item" ng-click="pauseOrResume('resume'); changePauseVar(false);">
+          <i class="icon ion-ios-play"></i> Play
+        </a>
+        </span>
+        <a class="tab-item" ng-click="skip()">
+          <i class="icon ion-ios-skipforward"></i> Skip
+        </a>
+      </div>
     </div>
     </ion-list>
 

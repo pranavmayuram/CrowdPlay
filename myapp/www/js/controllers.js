@@ -255,8 +255,30 @@ angular.module('starter.controllers', [])
         SC.stream("https://api.soundcloud.com/tracks/" + id, function (sound) {
             // Save sound, it holds all the data needed to stop, resume, etc.
             $scope.soundObj = sound;
-            sound.play();
+            $scope.paused = false;
+            console.log($scope.paused);
+            sound.play('mySound', {
+                onfinish: function() {
+                    console.log('The sound finished playing.');
+                }
+            });
         });
+    };
+
+    $scope.pauseOrResume = function(someString){
+        var soundLocal = {};
+        if (someString === 'pause') {
+            $scope.soundObj.pause('mySound');
+        }
+        else if (someString === 'resume') {
+            console.log($scope.soundObj);
+            $scope.soundObj.play('mySound');
+        }
+    }
+
+    $scope.changePauseVar = function(someBool) {
+        $scope.paused = someBool;
+        console.log($scope.paused);
     };
 
     /*$scope.refreshPlaylist = function() {
@@ -346,9 +368,4 @@ angular.module('starter.controllers', [])
                 console.log(result);
             });
     }*/
-
-
-    $scope.pause = function(){
-      $scope.soundObj.pause();
-    }
 });
