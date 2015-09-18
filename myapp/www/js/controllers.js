@@ -242,24 +242,98 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('AccountCtrl', function($scope, $http, $state, $window, $stateParams) {
+.controller('AccountCtrl', function($scope, $http, $state, $window, $stateParams, $interval) {
 	$scope.settings = {
 		enableFriends: true
 	};
 
-    $scope.play = function(id){
+    /*$scope.initialPull = function() {
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+            .success(function(result) {
+                console.log(result);
+                for (i=0; i<result.length; i++) {
+                    if (!result[i].CrowdPlay.image) {
+                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+                    }
+                    tempArray.push(result[i].CrowdPlay);
+                }
+                $scope.nowPlaying = tempArray[0];
+                var endLength = tempArray.length + 1;
+                $scope.queue = tempArray.slice(1, endLength);
+                $scope.play($scope.nowPlaying);
+                $scope.nowPlayingChange($scope.nowPlaying.songID);
+            })
+            .error(function(result) {
+                console.log(error);
+            });
+    };*/
+
+    $scope.getAllSongsManip = function() {
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+            .success(function(result) {
+                console.log(result);
+                var tempArray = [];
+                for (i=0; i<result.length; i++) {
+                    if (!result[i].CrowdPlay.image) {
+                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+                    }
+                    tempArray.push(result[i].CrowdPlay);
+                }
+                $scope.nowPlaying = tempArray[0];
+                var endLength = tempArray.length + 1;
+                $scope.queue = tempArray.slice(1, endLength);
+                $scope.nowPlayingChange($scope.nowPlaying.songID);
+                $scope.play($scope.nowPlaying);
+            })
+            .error(function(result) {
+                console.log('ERROR: ');
+                console.log(error);
+            });
+    };
+
+    $scope.initializeQueue = function() {
+        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+            .success(function(result) {
+                console.log(result);
+            })
+            .error(function(result) {
+                console.log('ERROR: ');
+                console.log(error);
+            });
+    };
+
+    $scope.next = function(){
+        $scope.soundObj.pause('mySound');
+        $scope.nowPlaying = $scope.queue[0];
+        var queue = $scope.queue;
+        var endLength = queue.length + 1;
+        $scope.queue = queue.slice(1, endLength);
+        $scope.nowPlayingChange($scope.nowPlaying);
+        $scope.play($scope.nowPlaying.songID);
+    };
+
+    $scope.play = function(someObject){
         SC.initialize({
           client_id: 'f3b6636c2e427ba511f65603ba7448b7'
         });
-        
-        SC.stream("https://api.soundcloud.com/tracks/" + id, function (sound) {
+        console.log(someObject);
+        SC.stream("https://api.soundcloud.com/tracks/" + someObject.songID, function (sound) {
             // Save sound, it holds all the data needed to stop, resume, etc.
             $scope.soundObj = sound;
             $scope.paused = false;
+            console.log($scope.soundObj);
             console.log($scope.paused);
+            var counter = 0;
+            $interval(function() {
+                counter++;
+                console.log(counter);
+                if (counter >= someObject.songLength/1000) {
+                    $scope.next();
+                }
+            }, 1000);
             sound.play('mySound', {
                 onfinish: function() {
-                    console.log('The sound finished playing.');
+                    $scope.next();
                 }
             });
         });
@@ -281,19 +355,6 @@ angular.module('starter.controllers', [])
         console.log($scope.paused);
     };
 
-    /*$scope.refreshPlaylist = function() {
-        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs",  params: {'playlistChannel': $window.localStorage.playlistChannel}})
-            .success(function(result) {
-                var tempArray = [];
-                for (i=0; i<result.length; i++) {
-                    if (!result[i].CrowdPlay.image) {
-                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
-                    }
-                    tempArray.push(result[i].CrowdPlay);
-                }
-            })
-    }*/
-
     $scope.nowPlayingChange = function(songID) {
         $http({method: "POST", url: "http://localhost:3000/api/nowPlayingChange", data: {'playlistChannel': $window.localStorage.playlistChannel, 'songID': songID}})
             .success(function(result) {
@@ -303,61 +364,6 @@ angular.module('starter.controllers', [])
                 console.log(result)
             });
     };
-
-    $scope.initialPull = function() {
-        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
-            .success(function(result) {
-                console.log(result);
-                for (i=0; i<result.length; i++) {
-                    if (!result[i].CrowdPlay.image) {
-                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
-                    }
-                    tempArray.push(result[i].CrowdPlay);
-                }
-                $scope.nowPlaying = tempArray[0];
-                var endLength = tempArray.length + 1;
-                $scope.queue = tempArray.slice(1, endLength);
-                $scope.play($scope.nowPlaying.songID);
-                $scope.nowPlayingChange($scope.nowPlaying.songID);
-            })
-            .error(function(result) {
-                console.log(error);
-            });
-    };
-
-    $scope.getAllSongsManip = function() {
-        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
-            .success(function(result) {
-                console.log(result);
-                var tempArray = [];
-                for (i=0; i<result.length; i++) {
-                    if (!result[i].CrowdPlay.image) {
-                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
-                    }
-                    tempArray.push(result[i].CrowdPlay);
-                }
-                $scope.nowPlaying = tempArray[0];
-                var endLength = tempArray.length + 1;
-                $scope.queue = tempArray.slice(1, endLength);
-                $scope.nowPlayingChange($scope.nowPlaying.songID);
-                $scope.play($scope.nowPlaying.songID);
-            })
-            .error(function(result) {
-                console.log('ERROR: ');
-                console.log(error);
-            });
-    };
-
-    $scope.initializeQueue = function() {
-        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
-            .success(function(result) {
-                console.log(result);
-            })
-            .error(function(result) {
-                console.log('ERROR: ');
-                console.log(error);
-            });
-    }
 
     /*$scope.nowPlayingChange = function(songID) {
         $http({method: "POST", url: "http://localhost:3000/api/nowPlayingChange", params: {'playlistChannel': $window.localStorage.playlistChannel, 'songID': songID}})
