@@ -337,8 +337,7 @@ angular.module('starter.controllers', [])
     };
 
     $scope.runCounter = function(someObject) {
-        var stop;
-        stop = $interval(function() {
+        $scope.stop = $interval(function() {
             $scope.counter++;
             console.log($scope.counter);
             if ($scope.counter >= someObject.songLength/1000) {
@@ -349,7 +348,7 @@ angular.module('starter.controllers', [])
     };
 
     $scope.stopCounter = function() {
-        $interval.cancel(stop);   
+        $interval.cancel($scope.stop);   
     };
 
     $scope.resetCounter = function() {
@@ -360,10 +359,12 @@ angular.module('starter.controllers', [])
         var soundLocal = {};
         if (someString === 'pause') {
             $scope.soundObj.pause('mySound');
+            $scope.stopCounter();
         }
         else if (someString === 'resume') {
             console.log($scope.soundObj);
             $scope.soundObj.play('mySound');
+            $scope.runCounter($scope.nowPlaying);
         }
     }
 
