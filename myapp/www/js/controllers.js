@@ -282,6 +282,8 @@ angular.module('starter.controllers', [])
                 $scope.nowPlaying = tempArray[0];
                 var endLength = tempArray.length + 1;
                 $scope.queue = tempArray.slice(1, endLength);
+                console.log('queue');
+                console.log($scope.queue);
                 $scope.nowPlayingChange($scope.nowPlaying.songID);
                 $scope.play($scope.nowPlaying);
             })
@@ -305,16 +307,17 @@ angular.module('starter.controllers', [])
     $scope.next = function(){
         $scope.soundObj.pause('mySound');
         $scope.nowPlaying = $scope.queue[0];
-        var queue = $scope.queue;
+        var queue = {};
+        queue = $scope.queue;
         var endLength = queue.length + 1;
         $scope.queue = queue.slice(1, endLength);
-        $scope.nowPlayingChange($scope.nowPlaying);
-        $scope.play($scope.nowPlaying.songID);
+        $scope.nowPlayingChange($scope.nowPlaying.songID);
+        $scope.play($scope.nowPlaying);
     };
 
     $scope.play = function(someObject){
         SC.initialize({
-          client_id: 'f3b6636c2e427ba511f65603ba7448b7'
+            client_id: 'f3b6636c2e427ba511f65603ba7448b7'
         });
         console.log(someObject);
         SC.stream("https://api.soundcloud.com/tracks/" + someObject.songID, function (sound) {
@@ -323,20 +326,34 @@ angular.module('starter.controllers', [])
             $scope.paused = false;
             console.log($scope.soundObj);
             console.log($scope.paused);
-            var counter = 0;
-            $interval(function() {
-                counter++;
-                console.log(counter);
-                if (counter >= someObject.songLength/1000) {
-                    $scope.next();
-                }
-            }, 1000);
+            $scope.resetCounter();
+            $scope.runCounter(someObject);
             sound.play('mySound', {
                 onfinish: function() {
                     $scope.next();
                 }
             });
         });
+    };
+
+    $scope.runCounter = function(someObject) {
+        var stop;
+        stop = $interval(function() {
+            $scope.counter++;
+            console.log($scope.counter);
+            if ($scope.counter >= someObject.songLength/1000) {
+                $scope.stopCounter();
+                $scope.next();
+            }
+        }, 1000);
+    };
+
+    $scope.stopCounter = function() {
+        $interval.cancel(stop);   
+    };
+
+    $scope.resetCounter = function() {
+        $scope.counter = 0;
     };
 
     $scope.pauseOrResume = function(someString){
