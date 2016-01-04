@@ -103,7 +103,7 @@ var appRouter = function(app) {
                 res.send('shit, nowChange dun goofed');
                 return;
             }
-            res.json(result);   
+            res.json(result);
         });
     });
 

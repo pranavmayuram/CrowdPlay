@@ -9,15 +9,30 @@
       <img ng-src="song.artwork_url" width="20"/>  {{song.title}}
     </div>
   </div>-->
-  <div class="list">
-    <div ng-repeat="song in songs">
-      <div class="item item-thumbnail-left" ng-click="addSong(song)">
-        <img ng-src="{{song.artwork_url}}">
-        <!--<div ng-if="!song.artwork_url"><img src="http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png" width="100px"></div>-->
-        <h2>{{song.title}}</h2>
-        <p>{{song.genre}}</p>
+  <div ng-show="loading" class="row row-center">
+      <div class="col text-center">
+          <br/>
+          <br/>
+          <ion-spinner></ion-spinner>
       </div>
-    </div>
+  </div>
+  <div ng-show="!loading">
+      <div ng-show="noresults" class="row">
+          <div class="col text-center">
+            <h4>Search for tracks, artists, podcasts, and playlists</h4>
+            <img src="https://developers.soundcloud.com/assets/powered_by_large_black-64fec369eec44b7ee75119f288c6d010.png" width="80"/>
+          </div>
+      </div>
+      <div class="list" ng-show="!noresults">
+        <div ng-repeat="song in songs">
+          <div class="item item-thumbnail-left" ng-click="addSong(song)">
+            <img ng-src="{{song.artwork_url}}">
+            <!--<div ng-if="!song.artwork_url"><img src="http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png" width="100px"></div>-->
+            <h2>{{song.title}}</h2>
+            <p>{{song.genre}}</p>
+          </div>
+        </div>
+      </div>
   </div>
   </ion-content>
 </ion-view>

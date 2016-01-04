@@ -1,8 +1,16 @@
 angular.module('starter.controllers', [])
 
 .controller('DashCtrl', function ($scope, $http, $window, $ionicPopup) {
-	
+
+	$scope.noresults = true;
+	$scope.loading = false;
+
     $scope.searchSongs = function(someString) {
+		if (someString.length === 0) {
+			$scope.noresults = true;
+			return;
+		}
+		$scope.loading = true;
 		SC.initialize({
 			client_id: 'f3b6636c2e427ba511f65603ba7448b7'
 		});
@@ -13,12 +21,17 @@ angular.module('starter.controllers', [])
                     tracks[i].artwork_url="http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
                 }
             }
+		  $scope.loading = false;
           $scope.songs = tracks;
+		  console.log("tracks.length: "+tracks.length);
+		  if (tracks.length > 0) {
+			  $scope.noresults = false;
+		  }
         });
 	};
 
     $scope.getAllSongs = function() {
-        console.log('localStorage: '); 
+        console.log('localStorage: ');
         console.log($window.localStorage);
         $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
@@ -103,7 +116,7 @@ angular.module('starter.controllers', [])
     // };
 
     $scope.getAllSongs = function() {
-        console.log('localStorage: '); 
+        console.log('localStorage: ');
         console.log($window.localStorage);
         $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
@@ -138,16 +151,18 @@ angular.module('starter.controllers', [])
                 console.log('ERROR: ');
                 console.log(error);
             });}
-            , 5000);
-        
+            , 3000);
+
     };
 
-	$scope.chats = Chats.all();
-	$scope.remove = function(chat) {
-		Chats.remove(chat);
-	};
-
     $scope.upvote = function(someID) {
+		console.log(someID + ': ' + $window.localStorage[someID]);
+		if ($window.localStorage[someID] == null) {
+			$window.localStorage[someID] = true;
+		}
+		else {
+			return;
+		}
         $http({method: "POST", url: "http://localhost:3000/api/upvote", data: {'songID': someID, 'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
                 console.log(result);
@@ -169,6 +184,13 @@ angular.module('starter.controllers', [])
     };
 
     $scope.downvote = function(someID) {
+		console.log(someID + ': ' + $window.localStorage[someID]);
+		if ($window.localStorage[someID] == null) {
+			$window.localStorage[someID] = false;
+		}
+		else {
+			return;
+		}
         $http({method: "POST", url: "http://localhost:3000/api/downvote", data: {'songID': someID, 'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
                 console.log(result);
@@ -364,7 +386,7 @@ angular.module('starter.controllers', [])
     };
 
     $scope.stopCounter = function() {
-        $interval.cancel($scope.stop);   
+        $interval.cancel($scope.stop);
     };
 
     $scope.resetCounter = function() {

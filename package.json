@@ -8,7 +8,7 @@
     "async": "~1.4.0",
     "body-parser": "~1.5.2",
     "cors": "^2.7.1",
-    "couchbase": "^2.1.0",
+    "couchbase": "^2.1.2",
     "express": "~4.7.2",
     "gulp": "~3.9.0",
     "http": "0.0.0",

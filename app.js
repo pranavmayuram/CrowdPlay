@@ -30,4 +30,4 @@ var routes = require("./routes/routes.js")(app);
 var httpServer = http.createServer(app);
 httpServer.listen(config.couchbase.portNum);
 
-console.log('View Touchbase at localhost:' + config.couchbase.portNum);
+console.log('View CrowdPlay at localhost:' + config.couchbase.portNum);
