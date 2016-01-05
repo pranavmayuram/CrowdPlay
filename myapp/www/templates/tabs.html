@@ -6,21 +6,19 @@ navigation history that also transitions its views in and out.
 
 <ion-tabs class="tabs-icon-top tabs-color-active-positive">
 
-  <!-- Account Tab -->
-  <ion-tab title="Queue" icon-off="ion-shuffle" icon-on="ion-shuffle" href="#/tab/account">
-    <ion-nav-view name="tab-account"></ion-nav-view>
+  <!-- Now Playing Tab -->
+  <ion-tab title="Now Playing" icon-off="ion-play" icon-on="ion-play" href="#/tab/nowPlaying">
+    <ion-nav-view name="tab-nowPlaying"></ion-nav-view>
   </ion-tab>
 
-  <!-- Chats Tab -->
-  <div ng-controller="ChatsCtrl" ng-click="getAllSongs()">
-  <ion-tab title="Voting" icon-off="ion-android-done-all" icon-on="ion-android-done-all" href="#/tab/chats">
-    <ion-nav-view name="tab-chats"></ion-nav-view>
+  <!-- Voting Tab -->
+  <ion-tab title="Voting" icon-off="ion-android-done-all" icon-on="ion-android-done-all" href="#/tab/voting">
+    <ion-nav-view name="tab-voting"></ion-nav-view>
   </ion-tab>
-  </div>
 
-  <!-- Dashboard Tab -->
-  <ion-tab title="Search" icon-off="ion-ios-search" icon-on="ion-ios-search-strong" href="#/tab/dash">
-    <ion-nav-view name="tab-dash"></ion-nav-view>
+  <!-- Search Tab -->
+  <ion-tab title="Search" icon-off="ion-ios-search" icon-on="ion-ios-search" href="#/tab/search">
+    <ion-nav-view name="tab-search"></ion-nav-view>
   </ion-tab>
 
   <!-- Dashboard Tab -->

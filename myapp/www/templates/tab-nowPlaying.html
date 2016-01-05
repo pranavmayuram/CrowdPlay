@@ -1,0 +1,68 @@
+<ion-view view-title="Now Playing" ng-init="adminDecide()">
+  <ion-content>
+
+    <div ng-show="noContent">
+        <h4><font color="grey">{{noContent}}</font></h4>
+    </div>
+
+    <!-- ADMIN NOW PLAYING-->
+    <div ng-show="admin == 'true'">
+        <ion-list>
+        <div class="list card">
+          <div class="item item-avatar">
+            <img ng-src="{{nowPlaying.image}}">
+            <h5><i class="ion-play"></i> <strong>Now Playing: </strong></h5>
+            <h4>{{nowPlaying.songName}}</h4>
+            <p>{{nowPlaying.genre}}</p>
+          </div>
+          <div class="item tabs tabs-secondary tabs-icon-left">
+            <span ng-show="!paused">
+            <a class="tab-item" ng-click="pauseOrResume('pause'); changePauseVar(true);">
+              <i class="icon ion-ios-pause"></i> Pause
+            </a>
+            </span>
+            <span ng-show="paused">
+            <a class="tab-item" ng-click="pauseOrResume('resume'); changePauseVar(false);">
+              <i class="icon ion-play"></i> Play
+            </a>
+            </span>
+            <a class="tab-item" ng-click="next()">
+              <i class="icon ion-ios-skipforward"></i> Skip
+            </a>
+          </div>
+        </div>
+        </ion-list>
+
+        <ion-list>
+        <div ng-repeat="song in queue">
+        	<div class="item item-thumbnail-left">
+    	       <img ng-src="{{song.image}}">
+    	       <h4>{{song.songName}}</h4>
+    	       <p>{{song.genre}}</p>
+    	    </div>
+        </div>
+        </ion-list>
+    </div>
+
+    <!-- Non-ADMIN NOW PLAYING-->
+    <div class="list card" ng-show="admin == 'false'">
+        <div class="item item-avatar">
+            <h2>{{nowPlaying.songName}}</h2>
+            <p>{{nowPlaying.genre}}</p>
+        </div>
+
+        <div class="item item-image">
+            <img ng-src="{{nowPlaying.image}}">
+        </div>
+
+        <a class="item item-icon-left assertive" href="#">
+            <div ng-show = "!paused">
+                <i class="ion-play"></i> Playing     {{nowPlaying.progress}}/{{nowPlaying.displayEnd}}
+            </div>
+            <div ng-show = "paused">
+                <i class="ion-ios-pause"></i> Paused       {{nowPlaying.progress}}/{{nowPlaying.displayEnd}}
+            </div>
+        </a>
+    </div>
+  </ion-content>
+</ion-view>

@@ -6,7 +6,11 @@
 </style>
 <ion-view view-title="Voting" ng-init="getAllSongs()">
   <ion-content>
-  <ion-spinner class="spinner-energized" ng-show="loading"></ion-spinner>
+  <div ng-show="loading">
+      <br/>
+      <br/>
+      <ion-spinner></ion-spinner>
+  </div>
     <!--<div class="tabs" style="top:0px;">
       <a class="tab-item">
         Home

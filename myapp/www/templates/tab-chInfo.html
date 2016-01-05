@@ -1,18 +1,28 @@
 <ion-view view-title="Channel Info" ng-init="getStats()">
   <ion-content class="padding">
-  
+
   <h5>Channel Name:</h5>
   <br/>
-  <h2>{{playlistChannel}}</h2>
-  <br/>
+  <div class="row">
+      <div class="col text-center">
+          <h3>{{playlistChannel}}</h3>
+      </div>
+  </div>
   <br/>
   <h5>Total Joins:</h5>
   <br/>
-  <h1>{{numJoins}}</h1>
-  <br/>
+  <div class="row">
+      <div class="col text-center">
+          <h3>{{numJoins}}</h3>
+      </div>
+  </div>
   <br/>
   <h5>Songs Voted On:</h5>
   <br/>
-  <h1>{{songCount}}</h1>
+  <div class="row">
+      <div class="col text-center">
+          <h3>{{songCount}}</h3>
+      </div>
+  </div>
   </ion-content>
 </ion-view>

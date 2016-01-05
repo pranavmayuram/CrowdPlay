@@ -1,4 +1,4 @@
-<ion-view view-title="Search" ng-controller="DashCtrl" ng-init="getAllSongs()">
+<ion-view view-title="Search" ng-init="getAllSongs()">
   <ion-content class="padding">
   <label class="item item-input">
     <i class="icon ion-search placeholder-icon"></i>
@@ -19,8 +19,10 @@
   <div ng-show="!loading">
       <div ng-show="noresults" class="row">
           <div class="col text-center">
-            <h4>Search for tracks, artists, podcasts, and playlists</h4>
-            <img src="https://developers.soundcloud.com/assets/powered_by_large_black-64fec369eec44b7ee75119f288c6d010.png" width="80"/>
+            <br/>
+            <br/>
+            <h4><font color="grey">Search for tracks, artists, podcasts, and playlists</font></h4>
+            <img src="http://thesource.com/wp-content/uploads/2014/07/soundcloud-logo-3.png" width="65"/>
           </div>
       </div>
       <div class="list" ng-show="!noresults">

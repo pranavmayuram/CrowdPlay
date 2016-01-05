@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('DashCtrl', function ($scope, $http, $window, $ionicPopup) {
+.controller('SearchCtrl', function ($scope, $http, $window, $ionicPopup) {
 
 	$scope.noresults = true;
 	$scope.loading = false;
@@ -77,6 +77,7 @@ angular.module('starter.controllers', [])
 			      title: 'Song successfully posted!',
 			      template: 'Your song has successfully been posted, get your friends to vote for it to hear it sooner!'
 			    });
+				$window.localStorage[uploadObj.songID] = true;
 			    alertPopup.then(function(result) {
 			      console.log('Thank you for not eating my delicious ice cream cone');
 			    });
@@ -87,7 +88,7 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('ChatsCtrl', function ($scope, Chats, $http, $state, $window, $interval, $timeout) {
+.controller('VotingCtrl', function ($scope, $http, $state, $window, $interval, $timeout) {
 	// With the new view caching in Ionic, Controllers are only called
 	// when they are recreated or on app start, instead of every page change.
 	// To listen for when this page is active (for example, to refresh data),
@@ -116,8 +117,6 @@ angular.module('starter.controllers', [])
     // };
 
     $scope.getAllSongs = function() {
-        console.log('localStorage: ');
-        console.log($window.localStorage);
         $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
                 console.log(result);
@@ -174,9 +173,6 @@ angular.module('starter.controllers', [])
                         console.log($scope.songs[i].voteCount);
                     }
                 }
-                //$window.location.reload(true);
-                //$state.go($state.current, {}, {reload: true});
-                //$state.reload();
             })
             .error(function(result) {
                 console.log(result);
@@ -210,13 +206,9 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('ChatDetailCtrl', function($scope, $stateParams, Chats, $ionicPopup) {
-	$scope.chat = Chats.get($stateParams.chatId);
-})
-
-.controller('login', function($scope, $stateParams, $state, $http, $window, $ionicPopup) {
+.controller('LoginCtrl', function($scope, $stateParams, $state, $http, $window, $ionicPopup) {
     $scope.loginCheck = function(someObject) {
-        $state.go('tab.chats');
+        $state.go('tab.voting');
     }
 
     $scope.joinChannel = function(someString) {
@@ -233,7 +225,7 @@ angular.module('starter.controllers', [])
                     $window.localStorage.playlistChannel = result.playlistChannel;
                     $window.localStorage.admin = false;
                     console.log($window.localStorage);
-                    $state.go('tab.chats');
+                    $state.go('tab.voting');
                 }
             })
             .error(function(result) {
@@ -255,7 +247,7 @@ angular.module('starter.controllers', [])
                     $window.localStorage.playlistChannel = result.playlistChannel;
                     $window.localStorage.admin = true;
                     console.log($window.localStorage);
-                    $state.go('tab.dash');
+                    $state.go('tab.search');
                 }
             })
             .error(function(result) {
@@ -280,76 +272,147 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('AccountCtrl', function($scope, $http, $state, $window, $stateParams, $interval) {
+.controller('NowPlayingCtrl', function($scope, $http, $state, $window, $stateParams, $interval) {
+
 	$scope.settings = {
 		enableFriends: true
 	};
 
-    /*$scope.initialPull = function() {
-        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
-            .success(function(result) {
-                console.log(result);
-                for (i=0; i<result.length; i++) {
-                    if (!result[i].CrowdPlay.image) {
-                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
-                    }
-                    tempArray.push(result[i].CrowdPlay);
-                }
-                $scope.nowPlaying = tempArray[0];
-                var endLength = tempArray.length + 1;
-                $scope.queue = tempArray.slice(1, endLength);
-                $scope.play($scope.nowPlaying);
-                $scope.nowPlayingChange($scope.nowPlaying.songID);
-            })
-            .error(function(result) {
-                console.log(error);
-            });
-    };*/
+	$scope.admin = $window.localStorage.admin;
 
+	$scope.adminDecide = function() {
+		console.log("in adminDecide");
+		if ($scope.admin == true) {
+			console.log("isAdmin");
+			$scope.getAllSongsManip();
+		}
+		else {
+			console.log("isNotAdmin");
+			$scope.getNowPlaying();
+		}
+	}
+
+	// function for admin to getAllSongs and play first one, while updating remaining queue
     $scope.getAllSongsManip = function() {
         $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
+				$scope.noContent = null;
+				if (result.noContent) {
+					$scope.noContent = result.noContent;
+                    console.log(result.noContent);
+				}
                 console.log(result);
                 var tempArray = [];
                 for (i=0; i<result.length; i++) {
                     if (!result[i].CrowdPlay.image) {
                         result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
                     }
-                    tempArray.push(result[i].CrowdPlay);
+					tempArray.push(result[i].CrowdPlay);
                 }
-                $scope.nowPlaying = tempArray[0];
+				$scope.nowPlaying = tempArray[0];
                 var endLength = tempArray.length + 1;
-                $scope.queue = tempArray.slice(1, endLength);
+				$scope.queue = tempArray.slice(1, endLength);
                 console.log('queue');
                 console.log($scope.queue);
-                $scope.nowPlayingChange($scope.nowPlaying.songID);
+                $scope.nowPlayingChange($scope.nowPlaying.songID, null);
                 $scope.play($scope.nowPlaying);
             })
             .error(function(result) {
                 console.log('ERROR: ');
                 console.log(error);
             });
+
+			// continually update queue for all new songs that are voted on
+			$interval(function() {
+	            $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+	            .success(function(result) {
+					$scope.noContent = null;
+					if (result.noContent) {
+						$scope.noContent = result.noContent;
+                        console.log(result.noContent);
+					}
+					console.log(result);
+	                var tempArray = [];
+	                for (i=0; i<result.length; i++) {
+	                    if (!result[i].CrowdPlay.image) {
+	                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+	                    }
+						tempArray.push(result[i].CrowdPlay);
+	                }
+					$scope.queue = tempArray;
+	                console.log('queue');
+	                console.log($scope.queue);
+	            })
+	            .error(function(result) {
+	                console.log('ERROR: ');
+	                console.log(error);
+	            });}
+	            , 3000);
+
     };
 
-    $scope.initializeQueue = function() {
-        $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
-            .success(function(result) {
-                console.log(result);
-            })
-            .error(function(result) {
-                console.log('ERROR: ');
-                console.log(error);
-            });
-    };
+	// function for non-admins to receive the currently playing song (derived from admin)
+	$scope.getNowPlaying = function() {
+		$http({method: "GET", url: "http://localhost:3000/api/getNowPlaying", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+			.success(function(result) {
+				$scope.noContent = null;
+				if (result.noContent) {
+					$scope.noContent = result.noContent;
+                    console.log(result.noContent);
+				}
+				console.log(result);
+				if (!result[0].CrowdPlay.image) {
+					result[0].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+				}
+				$scope.nowPlaying = result[0];
+			})
+			.error(function(result) {
+				console.log('ERROR: ');
+				console.log(error);
+			});
+
+		// continually update nowPlaying
+		$interval(function() {
+			$http({method: "GET", url: "http://localhost:3000/api/getNowPlaying", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+				.success(function(result) {
+					$scope.noContent = null;
+					if (result.noContent) {
+						$scope.noContent = result.noContent;
+                        console.log(result.noContent);
+					}
+					console.log(result);
+					if (!result[0].CrowdPlay.image) {
+						result[0].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+					}
+					$scope.nowPlaying = result[0];
+				})
+				.error(function(result) {
+					console.log('ERROR: ');
+					console.log(error);
+				});}
+			, 3000);
+	};
+
+    // $scope.initializeQueue = function() {
+    //     $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+    //         .success(function(result) {
+    //             console.log(result);
+    //         })
+    //         .error(function(result) {
+    //             console.log('ERROR: ');
+    //             console.log(error);
+    //         });
+    // };
 
     $scope.next = function(){
         $scope.soundObj.pause('mySound');
+		var oldSong = $scope.nowPlaying;
         $scope.nowPlaying = $scope.queue[0];
         var queue = {};
         queue = $scope.queue;
         var endLength = queue.length + 1;
         $scope.queue = queue.slice(1, endLength);
-        $scope.nowPlayingChange($scope.nowPlaying.songID);
+        $scope.nowPlayingChange($scope.nowPlaying.songID, oldSong.songID);
         $scope.play($scope.nowPlaying);
     };
 
@@ -411,8 +474,8 @@ angular.module('starter.controllers', [])
         console.log($scope.paused);
     };
 
-    $scope.nowPlayingChange = function(songID) {
-        $http({method: "POST", url: "http://localhost:3000/api/nowPlayingChange", data: {'playlistChannel': $window.localStorage.playlistChannel, 'songID': songID}})
+    $scope.nowPlayingChange = function(songID, oldID) {
+        $http({method: "POST", url: "http://localhost:3000/api/nowPlayingChange", data: {'playlistChannel': $window.localStorage.playlistChannel, 'songID': songID, 'oldID': oldID}})
             .success(function(result) {
                 console.log(result);
             })

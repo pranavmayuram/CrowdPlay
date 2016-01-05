@@ -35,7 +35,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   .state('login', {
     url: '/login',
     templateUrl: 'templates/login.html',
-    controller: 'login'
+    controller: 'LoginCtrl'
   })
 
   .state('tab', {
@@ -46,47 +46,37 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
 
   // Each tab has its own nav history stack:
 
-  .state('tab.dash', {
-    url: '/dash',
+  .state('tab.search', {
+    url: '/search',
     views: {
-      'tab-dash': {
-        templateUrl: 'templates/tab-dash.html',
-        controller: 'DashCtrl'
+      'tab-search': {
+        templateUrl: 'templates/tab-search.html',
+        controller: 'SearchCtrl'
       }
     }
   })
 
-  .state('tab.chats', {
-      url: '/chats',
+  .state('tab.voting', {
+      url: '/voting',
       views: {
-        'tab-chats': {
-          templateUrl: 'templates/tab-chats.html',
-          controller: 'ChatsCtrl'
+        'tab-voting': {
+          templateUrl: 'templates/tab-voting.html',
+          controller: 'VotingCtrl'
         }
       }
     })
 
-    .state('tab.chat-detail', {
-      url: '/chats/:chatId',
-      views: {
-        'tab-chats': {
-          templateUrl: 'templates/chat-detail.html',
-          controller: 'ChatDetailCtrl'
-        }
-      }
-    })
-
-  .state('tab.account', {
-    url: '/account',
+  .state('tab.nowPlaying', {
+    url: '/nowPlaying',
     views: {
-      'tab-account': {
-        templateUrl: 'templates/tab-account.html',
-        controller: 'AccountCtrl'
+      'tab-nowPlaying': {
+        templateUrl: 'templates/tab-nowPlaying.html',
+        controller: 'NowPlayingCtrl'
       }
     }
   })
 
-  .state('tab.chInfo', { 
+  .state('tab.chInfo', {
     url: '/chInfo',
     views: {
       'tab-chInfo': {

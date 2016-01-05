@@ -95,15 +95,42 @@ var appRouter = function(app) {
         });
     });
 
-    app.post("/api/nowPlayingChange", function(req, res) {
-        var nowChange = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS(\""+req.body.songID+"_"+req.body.playlistChannel+"\") SET nowPlaying = true");
-         bucket.query(nowChange, function(error, result) {
+    app.get("/api/getNowPlaying", function(req, res) {
+        var getNowPlaying = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"song\" AND playlistChannel = $1 AND nowPlaying = true ORDER BY voteCount DESC, songName");
+        console.log(getNowPlaying);
+        bucket.query(getNowPlaying, [req.query.playlistChannel], function(error, result) {
             if (error) {
-                console.log(result);
-                res.send('shit, nowChange dun goofed');
+                console.log(error);
+                res.send('getting nowPlaying dun goofed');
+                return;
+            }
+            console.log(result);
+            if (result.length === 0) {
+                res.send({'noContent': 'There are currently no songs playing. Ask your friend who made the channel to play some music!'});
                 return;
             }
             res.json(result);
+        });
+    });
+
+    app.post("/api/nowPlayingChange", function(req, res) {
+        var nowChange = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS(\""+req.body.songID+"_"+req.body.playlistChannel+"\") SET nowPlaying = true");
+        var deleteOld = N1qlQuery.fromString("DELETE FROM `CrowdPlay` USE KEYS(\""+req.body.oldID+"_"+req.body.playlistChannel+"\")");
+        bucket.query(nowChange, function(error, result) {
+            if (error) {
+                console.log(error);
+                res.send('shit, nowChange dun goofed');
+                return;
+            }
+            if (req.body.oldID);
+            bucket.query(deleteOld, function(err, result) {
+                if (err) {
+                    console.log(err);
+                    res.send('shit, deleteOld dun goofed');
+                    return;
+                }
+                res.json(result);
+            });
         });
     });
 
