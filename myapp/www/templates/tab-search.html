@@ -25,13 +25,23 @@
             <img src="http://thesource.com/wp-content/uploads/2014/07/soundcloud-logo-3.png" width="65"/>
           </div>
       </div>
-      <div class="list" ng-show="!noresults">
+      <div ng-show="noresults2" class="row">
+          <div class="col text-center">
+            <br/>
+            <br/>
+            <h4><font color="grey">Sorry, there are no results for your search</font></h4>
+            <img src="http://thesource.com/wp-content/uploads/2014/07/soundcloud-logo-3.png" width="65"/>
+          </div>
+      </div>
+
+      <div class="list" ng-show="!noresults && !noresults2">
         <div ng-repeat="song in songs">
-          <div class="item item-thumbnail-left" ng-click="addSong(song)">
+          <div class="item item-thumbnail-left">
             <img ng-src="{{song.artwork_url}}">
             <!--<div ng-if="!song.artwork_url"><img src="http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png" width="100px"></div>-->
             <h2>{{song.title}}</h2>
             <p>{{song.genre}}</p>
+            <button ng-click="addSong(song)" class="button button-small button-outline icon-left ion-plus-circled button-positive">   Add</button>
           </div>
         </div>
       </div>

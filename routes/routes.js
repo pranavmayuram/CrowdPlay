@@ -7,6 +7,7 @@ var N1qlQuery   = require('couchbase').N1qlQuery;
 
 var appRouter = function(app) {
 
+    // API to upvote (admin can also do this)
     app.post("/api/upvote", function(req, res) {
         var updatedID = req.body.songID + "_" + req.body.playlistChannel;
         console.log(updatedID);
@@ -34,6 +35,7 @@ var appRouter = function(app) {
         });
     });
 
+    // API to downvote (admin can also do this)
     app.post("/api/downvote", function(req, res) {
         var updatedID = req.body.songID + "_" + req.body.playlistChannel;
         var changeVote = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS ($1) SET voteCount = voteCount - 1");
@@ -49,6 +51,7 @@ var appRouter = function(app) {
         });
     });
 
+    // API to add song (admin can also do this)
     app.post("/api/addSong", function(req, res) {
         console.log(req.body);
         var songObj = {
@@ -63,13 +66,13 @@ var appRouter = function(app) {
             songLength: req.body.songLength,
             songTime: 0
         };
-        var insertSong = N1qlQuery.fromString("UPSERT INTO `CrowdPlay` (KEY, VALUE) VALUES (\""+songObj.songID+"_"+songObj.playlistChannel+"\", "+JSON.stringify(songObj)+")");
+        var insertSong = N1qlQuery.fromString("INSERT INTO `CrowdPlay` (KEY, VALUE) VALUES (\""+songObj.songID+"_"+songObj.playlistChannel+"\", "+JSON.stringify(songObj)+")");
         //var insertSong = N1qlQuery.fromString("SELECT * FROM `CrowdPlay`");
         console.log(insertSong);
         bucket.query(insertSong, function (error, result) {
             if (error) {
                 console.log(error);
-                return res.status(400).send(error);
+                return res.send({'songExists': true});
             }
             console.log(result);
             res.send('song inserted');
@@ -95,6 +98,28 @@ var appRouter = function(app) {
         });
     });
 
+    // API for admin to update the currently playing song
+    app.post("/api/updateNowPlaying", function (req, res) {
+        var nowPlaying = "";
+        if (req.body.paused == true) {
+            nowPlaying = "false";
+        }
+        else {
+            nowPlaying = "true";
+        }
+        var nowUpdate = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS(\""+req.body.songID+"_"+req.body.playlistChannel+"\") SET nowPlaying = "+ nowPlaying +", progress = "+ req.body.progress);
+        bucket.query(nowUpdate, function (error, result) {
+            if (error) {
+                console.log(error);
+                res.send('nowUpdate dun goofed');
+                return;
+            }
+            res.json(result);
+        });
+    });
+
+
+    // API for non-admins to see the song that is currently playing
     app.get("/api/getNowPlaying", function(req, res) {
         var getNowPlaying = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"song\" AND playlistChannel = $1 AND nowPlaying = true ORDER BY voteCount DESC, songName");
         console.log(getNowPlaying);
@@ -113,27 +138,32 @@ var appRouter = function(app) {
         });
     });
 
+    // API used by admin whenever current song goes to next (either by way of a skip, or simply one song ending)
     app.post("/api/nowPlayingChange", function(req, res) {
-        var nowChange = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS(\""+req.body.songID+"_"+req.body.playlistChannel+"\") SET nowPlaying = true");
+        var nowChange = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS(\""+req.body.songID+"_"+req.body.playlistChannel+"\") SET nowPlaying = true, progress = 0");
         var deleteOld = N1qlQuery.fromString("DELETE FROM `CrowdPlay` USE KEYS(\""+req.body.oldID+"_"+req.body.playlistChannel+"\")");
+        console.log(nowChange);
         bucket.query(nowChange, function(error, result) {
             if (error) {
                 console.log(error);
                 res.send('shit, nowChange dun goofed');
                 return;
             }
-            if (req.body.oldID);
-            bucket.query(deleteOld, function(err, result) {
-                if (err) {
-                    console.log(err);
-                    res.send('shit, deleteOld dun goofed');
-                    return;
-                }
-                res.json(result);
-            });
+            if (req.body.oldID) {
+                console.log(deleteOld);
+                bucket.query(deleteOld, function(err, result) {
+                    if (err) {
+                        console.log(err);
+                        res.send('shit, deleteOld dun goofed');
+                        return;
+                    }
+                    res.json(result);
+                });
+            }
         });
     });
 
+    // API to create channel; the person who does so will become admin
     app.post("/api/createChannel", function(req, res) {
         var channelID = req.body.playlistChannel + "_channel";
         var checkChannel = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"channel\" AND playlistChannel = $1");
@@ -167,6 +197,7 @@ var appRouter = function(app) {
         });
     });
 
+    // API to join channel, this person will not be admin
     app.post("/api/joinChannel", function(req, res) {
         var checkChannel = N1qlQuery.fromString("SELECT * FROM `CrowdPlay` WHERE type=\"channel\" AND playlistChannel = $1");
         console.log(checkChannel);
@@ -183,7 +214,7 @@ var appRouter = function(app) {
                 return;
             }
             console.log(result);
-            console.log('channel joined!')
+            console.log('channel joined!');
             var channelID = req.body.playlistChannel + "_channel";
             var updateChannelCount = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS($1) SET numJoins = numJoins + 1");
             console.log(updateChannelCount);
@@ -199,6 +230,7 @@ var appRouter = function(app) {
         });
     });
 
+    // get basic statistics about channel for the channel info page
     app.get("/api/statistics", function(req, res) {
         var bigQuery = N1qlQuery.fromString("SELECT numJoins FROM `CrowdPlay` WHERE type=\"channel\" AND playlistChannel = $1");
         console.log(bigQuery);

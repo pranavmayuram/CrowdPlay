@@ -1,5 +1,5 @@
 <ion-view title="CrowdPlay">
-  <ion-content>
+  <ion-content ng-init="loginCheck()">
   <div class="row row-center">
   <div class="col" style="text-align:center">
     <img src="./img/CloudPlay.png" width="80"/>
@@ -33,7 +33,7 @@
       <button nav-clear class="button button-block button-balanced" style="text-align:center" ng-click="createChannel(createChannelVar)">
         Create
       </button>
-   
+
     </div>
   </ion-content>
 </ion-view>
