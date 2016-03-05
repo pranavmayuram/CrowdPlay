@@ -295,7 +295,11 @@ angular.module('starter.controllers', [])
                     return;
 				}
 				console.log(result);
-				if (!result[0].CrowdPlay.image) {
+				if (result[0].CrowdPlay.image) {
+					var str = result[0].CrowdPlay.image;
+					result[0].CrowdPlay.image = str.replace("large.jpg", "t500x500.jpg");
+				}
+				else {
 					result[0].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
 				}
 				$scope.nowPlaying = result[0].CrowdPlay;
@@ -303,30 +307,57 @@ angular.module('starter.controllers', [])
 				$scope.nowPlaying.finalSeconds = $scope.nowPlaying.songLength % 60;
 				$scope.nowPlaying.minutes = Math.floor($scope.nowPlaying.progress / 60);
 				$scope.nowPlaying.seconds = $scope.nowPlaying.progress % 60;
+				if ($scope.nowPlaying.seconds < 10) {
+					$scope.nowPlaying.seconds = "0" + $scope.nowPlaying.seconds;
+				}
+				if ($scope.nowPlaying.finalSeconds < 10) {
+					$scope.nowPlaying.seconds = "0" + $scope.nowPlaying.seconds;
+				}
+				startNowPlayingProcess();
 			})
 			.error(function(result) {
 				console.log('ERROR: ');
 				console.log(error);
 			});
+	};
 
-		// continually update nowPlaying
-		$interval(function() {
+	var endProcess = function(someProcess) {
+		$interval.cancel(someProcess);
+	};
+
+	// continually update nowPlaying
+	var startNowPlayingProcess = function() {
+		$scope.nowPlayingProcess = $interval(function() {
 			$http({method: "GET", url: "http://localhost:3000/api/getNowPlaying", params: {'playlistChannel': $window.localStorage.playlistChannel}})
 				.success(function(result) {
 					$scope.noContent = null;
 					if (result.noContent) {
 						$scope.noContent = result.noContent;
-                        console.log("IN NO CONTENT");
-                        console.log(result.noContent);
-                        return;
+						console.log("IN NO CONTENT");
+						console.log(result.noContent);
+						return;
 					}
 					console.log(result);
-					if (!result[0].CrowdPlay.image) {
+					if (result[0].CrowdPlay.image) {
+						var str = result[0].CrowdPlay.image;
+						result[0].CrowdPlay.image = str.replace("large.jpg", "t500x500.jpg");
+					}
+					else {
 						result[0].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
 					}
 					$scope.nowPlaying = result[0].CrowdPlay;
+					$scope.nowPlaying.finalMinutes = Math.floor($scope.nowPlaying.songLength / 60);
+					$scope.nowPlaying.finalSeconds = $scope.nowPlaying.songLength % 60;
 					$scope.nowPlaying.minutes = Math.floor($scope.nowPlaying.progress / 60);
 					$scope.nowPlaying.seconds = $scope.nowPlaying.progress % 60;
+					if ($scope.nowPlaying.seconds < 10) {
+						$scope.nowPlaying.seconds = "0" + $scope.nowPlaying.seconds;
+					}
+					if ($scope.nowPlaying.finalSeconds < 10) {
+						$scope.nowPlaying.seconds = "0" + $scope.nowPlaying.seconds;
+					}
+					console.log($scope.nowPlaying.seconds);
+
 				})
 				.error(function(result) {
 					console.log('ERROR: ');
@@ -342,44 +373,13 @@ angular.module('starter.controllers', [])
         $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
             .success(function(result) {
 				$scope.noContent = null;
+				$scope.nowPlaying = null;
 				if (result.noContent) {
 					$scope.noContent = result.noContent;
                     console.log("IN NO CONTENT");
                     console.log(result.noContent);
-                    return;
 				}
-                console.log(result);
-                var tempArray = [];
-                for (i=0; i<result.length; i++) {
-                    if (!result[i].CrowdPlay.image) {
-                        result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
-                    }
-					tempArray.push(result[i].CrowdPlay);
-                }
-				$scope.nowPlaying = tempArray[0];
-                var endLength = tempArray.length + 1;
-				$scope.queue = tempArray.slice(1, endLength);
-                console.log('queue');
-                console.log($scope.queue);
-                $scope.nowPlayingChange($scope.nowPlaying.songID, null);
-                $scope.play($scope.nowPlaying);
-            })
-            .error(function(result) {
-                console.log('ERROR: ');
-                console.log(error);
-            });
-
-			// continually update queue for all new songs that are voted on
-			$interval(function() {
-	            $http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
-	            .success(function(result) {
-					$scope.noContent = null;
-					if (result.noContent) {
-						$scope.noContent = result.noContent;
-                        console.log("IN NO CONTENT");
-                        console.log(result.noContent);
-                        return;
-					}
+				else {
 					console.log(result);
 	                var tempArray = [];
 	                for (i=0; i<result.length; i++) {
@@ -388,22 +388,64 @@ angular.module('starter.controllers', [])
 	                    }
 						tempArray.push(result[i].CrowdPlay);
 	                }
-					$scope.queue = tempArray;
+					$scope.nowPlaying = tempArray[0];
+	                var endLength = tempArray.length + 1;
+					$scope.queue = tempArray.slice(1, endLength);
 	                console.log('queue');
 	                console.log($scope.queue);
-	            })
-	            .error(function(result) {
-	                console.log('ERROR: ');
-	                console.log(error);
-	            });}
-	            , 3000);
+	                $scope.nowPlayingChange($scope.nowPlaying.songID, null);
+	                $scope.play($scope.nowPlaying);
+				}
+				startGetSongProcess();
+            })
+            .error(function(result) {
+                console.log('ERROR: ');
+                console.log(error);
+            });
 
     };
+
+	var startGetSongProcess = function() {
+		// continually update queue for all new songs that are voted on
+		$scope.getSongProcess = $interval(function() {
+			$http({method: "GET", url: "http://localhost:3000/api/getAllSongs", params: {'playlistChannel': $window.localStorage.playlistChannel}})
+			.success(function(result) {
+				$scope.noContent = null;
+				if (result.noContent && $scope.nowPlaying === null) {
+					$scope.noContent = result.noContent;
+					console.log("IN NO CONTENT");
+					console.log(result.noContent);
+					return;
+				}
+				else {
+					console.log(result);
+					var tempArray = [];
+					for (i=0; i<result.length; i++) {
+						if (!result[i].CrowdPlay.image) {
+							result[i].CrowdPlay.image = "http://icons.iconarchive.com/icons/danleech/simple/128/soundcloud-icon.png";
+						}
+						tempArray.push(result[i].CrowdPlay);
+					}
+					$scope.queue = tempArray;
+					console.log('queue');
+					console.log($scope.queue);
+				}
+			})
+			.error(function(result) {
+				console.log('ERROR: ');
+				console.log(error);
+			});}
+			, 1000);
+	};
 
     $scope.next = function(){
 		$scope.stopCounter();
         $scope.soundObj.pause('mySound');
 		var oldSong = $scope.nowPlaying;
+		if ($scope.queue.length === 0) {
+			$scope.nowPlaying = null;
+			return;
+		}
         $scope.nowPlaying = $scope.queue[0];
         var queue = {};
         queue = $scope.queue;
@@ -438,7 +480,7 @@ angular.module('starter.controllers', [])
         $scope.stop = $interval(function() {
             $scope.counter++;
             console.log($scope.counter);
-            if ($scope.counter >= someObject.songLength/1000) {
+            if ($scope.counter >= someObject.songLength) {
                 $scope.stopCounter();
                 $scope.next();
             }
@@ -464,7 +506,7 @@ angular.module('starter.controllers', [])
             $scope.soundObj.play('mySound');
             $scope.runCounter($scope.nowPlaying);
         }
-    }
+    };
 
     $scope.changePauseVar = function(someBool) {
         $scope.paused = someBool;
@@ -482,15 +524,17 @@ angular.module('starter.controllers', [])
             .error(function(result) {
                 console.log(result)
             });
-		$scope.nowPlayingUpdater = $interval(function() {
-			$http({method: "POST", url: "http://localhost:3000/api/updateNowPlaying", data: {'playlistChannel': $window.localStorage.playlistChannel, 'songID': songID, 'progress': $scope.counter, 'paused': $scope.paused}})
-            .success(function(result) {
-                console.log(result);
-            })
-            .error(function(result) {
-                console.log('ERROR: ');
-                console.log(error);
-            });}
-            , 1000);
+			$scope.nowPlayingUpdater = $interval(function() {
+				console.log("$scope.counter: " + $scope.counter);
+				$http({method: "POST", url: "http://localhost:3000/api/updateNowPlaying", data: {'playlistChannel': $window.localStorage.playlistChannel, 'songID': songID, 'progress': $scope.counter, 'paused': $scope.paused}})
+		            .success(function(result) {
+		                console.log(result);
+		            })
+		            .error(function(result) {
+		                console.log('ERROR: ');
+		                console.log(error);
+		            });}
+		            , 1000);
+
     };
 });

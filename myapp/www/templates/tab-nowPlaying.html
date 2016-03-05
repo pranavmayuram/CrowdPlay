@@ -6,7 +6,7 @@
         <br/>
         <div class="col text-center">
             <ion-spinner></ion-spinner>
-        </div> 
+        </div>
     </div>
 
     <div ng-show="!loading">
@@ -70,10 +70,10 @@
             </div>
 
             <div class="item item-icon-left assertive" href="#">
-                <div ng-show = "!paused">
+                <div ng-show = "!nowPlaying.paused">
                     <i class="ion-play"></i> Playing     {{nowPlaying.minutes}}:{{nowPlaying.seconds}}/{{nowPlaying.finalMinutes}}:{{nowPlaying.finalSeconds}}
                 </div>
-                <div ng-show = "paused">
+                <div ng-show = "nowPlaying.paused">
                     <i class="ion-ios-pause"></i> Paused       {{nowPlaying.minutes}}:{{nowPlaying.seconds}}/{{nowPlaying.finalMinutes}}:{{nowPlaying.finalSeconds}}
                 </div>
             </div>

@@ -63,7 +63,7 @@ var appRouter = function(app) {
             type: "song",
             nowPlaying: false,
             voteCount: 1,
-            songLength: req.body.songLength,
+            songLength: Math.floor(req.body.songLength/1000),
             songTime: 0
         };
         var insertSong = N1qlQuery.fromString("INSERT INTO `CrowdPlay` (KEY, VALUE) VALUES (\""+songObj.songID+"_"+songObj.playlistChannel+"\", "+JSON.stringify(songObj)+")");
@@ -100,14 +100,11 @@ var appRouter = function(app) {
 
     // API for admin to update the currently playing song
     app.post("/api/updateNowPlaying", function (req, res) {
-        var nowPlaying = "";
+        var paused = "false";
         if (req.body.paused == true) {
-            nowPlaying = "false";
+            paused = "true";
         }
-        else {
-            nowPlaying = "true";
-        }
-        var nowUpdate = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS(\""+req.body.songID+"_"+req.body.playlistChannel+"\") SET nowPlaying = "+ nowPlaying +", progress = "+ req.body.progress);
+        var nowUpdate = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS(\""+req.body.songID+"_"+req.body.playlistChannel+"\") SET paused = "+ paused +", progress = "+ req.body.progress);
         bucket.query(nowUpdate, function (error, result) {
             if (error) {
                 console.log(error);
@@ -140,7 +137,7 @@ var appRouter = function(app) {
 
     // API used by admin whenever current song goes to next (either by way of a skip, or simply one song ending)
     app.post("/api/nowPlayingChange", function(req, res) {
-        var nowChange = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS(\""+req.body.songID+"_"+req.body.playlistChannel+"\") SET nowPlaying = true, progress = 0");
+        var nowChange = N1qlQuery.fromString("UPDATE `CrowdPlay` USE KEYS(\""+req.body.songID+"_"+req.body.playlistChannel+"\") SET nowPlaying = true, progress = 0, paused = false");
         var deleteOld = N1qlQuery.fromString("DELETE FROM `CrowdPlay` USE KEYS(\""+req.body.oldID+"_"+req.body.playlistChannel+"\")");
         console.log(nowChange);
         bucket.query(nowChange, function(error, result) {
